@@ -1,0 +1,137 @@
+
+<!--
+	HTML Starter Template
+	Original Source: https://github.com/AsisYu/html-starter-qwpicu.git
+	License: Open Source
+	Author: AsisYu
+	Description: A beautiful personal homepage template with modern design
+	请尊重劳动成果，保留该注释信息
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<title>Yuの主页</title>
+	<meta charset="UTF-8">
+	<link rel="icon" href="./favicon.ico">
+	<meta http-equiv="Expires" content="0" />
+	<meta name='robots' content='index,follow'>
+	<meta name='keywords' content='狡猾的肘击yu,个人主页,狡猾的肘击yu的个人主'>
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta name='description' content='狡猾的肘击yu,个人主页,狡猾的肘击yu的个人主'>
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+	<link rel="stylesheet" href="asset/css/main.css" />
+	<link rel="stylesheet" type="text/css" href="asset/css/iconfont.css">
+	<link rel="stylesheet" type="text/css" href="asset/css/style.css">
+	<link rel="stylesheet" type="text/css" href="asset/css/fonts.css">
+	<link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/volantis-x/cdn-fontawesome-pro@master/css/all.min.css" media="all">
+	<!-- Google Fonts - 推荐字体组合 -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+	<script data-cfasync="false" src="asset/js/feature.js"></script>
+	<noscript>
+		<link rel="stylesheet" href="asset/css/noscript.css" />
+	</noscript>
+</head>
+<body class="is-preload font-milky-coffee">
+	<div id="wrapper">
+		<div id="bg"></div>
+		<div id="overlay"></div>
+		<div id="main">
+			<!-- Header -->
+			<header id="header">
+				<div class="panel-main__content">
+					<div class="ih-item circle effect right_to_left">
+						<a class="blog-button">
+							<div class="img"> <img src="https://q.qlogo.cn/headimg_dl?dst_uin=2773943729&spec=640&img_type=jpg" alt="img"
+									class="js-avatar iUp profilepic header-logo">
+							</div>
+							<div class="info iUp">
+								<div class="info-back">
+									<img alt="img" src="asset/image/kl.gif" class="js-avatar profilepic">
+								</div>
+							</div>
+						</a>
+					</div>
+					<h1 class="panel-cover__title panel-title iUp">YuYu</h1>
+					<p class="panel-cover__subtitle panel-subtitle iUp">be your true self</p>
+					<canvas class="navigation-wrapper iUp" id="canvas" style="width:50%;padding-top: 15px;padding-right: 20px;" width="920"
+						height="350"></canvas>
+					<script src="asset/js/clock.js"></script>
+					
+					<!-- 药丸形状按钮组 -->
+					<div class="pill-buttons-container iUp">
+						<a href="https://blog.example.com" class="pill-button" target="_blank">
+							<div class="pill-button-decor pill-left"></div>
+							<div class="pill-button-decor pill-right"></div>
+							<span class="pill-button-text">博客</span>
+						</a>
+						<a href="https://github.com/AsisYu/html-starter-qwpicu" class="pill-button" target="_blank">
+							<div class="pill-button-decor pill-left"></div>
+							<div class="pill-button-decor pill-right"></div>
+							<span class="pill-button-text">项目</span>
+						</a>
+						<a href="#about" class="pill-button">
+							<div class="pill-button-decor pill-left"></div>
+							<div class="pill-button-decor pill-right"></div>
+							<span class="pill-button-text">关于</span>
+						</a>
+						<a href="mailto:2773943729@qq.com" class="pill-button">
+							<div class="pill-button-decor pill-left"></div>
+							<div class="pill-button-decor pill-right"></div>
+							<span class="pill-button-text">联系</span>
+						</a>
+					</div>
+					
+					<!-- 联系方式图标 -->
+					<div class="contact-icons-container iUp">
+						<a href="https://wpa.qq.com/msgrd?v=3&uin=2773943729&site=qq&menu=yes" class="contact-icon" target="_blank" title="QQ">
+							<i class="fab fa-qq"></i>
+						</a>
+						<a href="#" class="contact-icon wechat-icon" title="微信">
+							<i class="fab fa-weixin"></i>
+							<div class="wechat-qr">
+								<img src="asset/image/weixin.png" alt="微信二维码">
+							</div>
+						</a>
+						<a href="mailto:2773943729@qq.com" class="contact-icon" title="邮箱">
+							<i class="fas fa-envelope"></i>
+						</a>
+						<a href="https://github.com/AsisYu" class="contact-icon" target="_blank" title="GitHub">
+							<i class="fab fa-github"></i>
+						</a>
+						<a href="https://space.bilibili.com/694052769" class="contact-icon" target="_blank" title="哔哩哔哩">
+							<i class="iconfont icon-bilibili"></i>
+						</a>
+						<a href="https://www.weibo.com/u/1776448504?tabtype=home" class="contact-icon" target="_blank" title="微博">
+							<i class="fab fa-weibo"></i>
+						</a>
+					</div>
+					
+					<hr class="iUp" />
+					<!--一言无法显示时的文字-->
+					<p id="description" class="panel-cover__description iUp">每一个人都应该<span class="highlight-red">明确</span>自己的方向<span class="highlight-green">和</span>位置
+						<strong>-「Yu裕」</strong>
+					</p>
+				</div>
+			</header>
+			<!-- Footer -->
+			<footer id="footer">
+				<p>
+					<b>&copy; 2022 - <script>document.write(new Date().getFullYear());</script><a href="https://qwp.icu" class="active">Yu</a>
+					</b>
+					<b>
+						<a href="https://beian.miit.gov.cn/">桂ICP备2023003912号-1</a>
+					</b>
+				</p>
+			</footer>
+		</div>
+	</div>
+    <script src="https://fastly.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js"></script>
+    <script type="text/javascript" src="asset/js/jquery.min.js"></script>
+    <script type="text/javascript" src="asset/js/fetch.min.js"></script>
+    <script type="text/javascript" src="asset/js/main.js"></script>
+</body>
+</html>
