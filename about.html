@@ -34,3 +34,46 @@
 							<p>于是，我接触到了第一个跟代码有关的东西——OpenWrt。</p>
 							<p>它让我知道，玩代码似乎也没那么难。</p>
 							<p>再到后来，不知道什么原因，我玩起了 Docker。</p>
+							<p>它似乎让我玩代码更加无脑，只需要复制、粘贴、运行，我很快就能得到我想要的东西。</p>
+							<p>再到后来，我接触到了对我影响最大的一个项目——MC 服务器，或许？</p>
+							<p>它让我拥有了属于我的域名，让我研究什么是公网、如何穿透、反代要怎么做。</p>
+							<p>但它似乎也没留下多少，或许只剩些存档。</p>
+							<p>再后来，我完成了更多项目：“Emby”“AutoBangumi”“WordPress”……</p>
+							<p>这个过程很头疼，但也很快乐。</p>
+							<p>在其中，AI 也帮了我很多：看不懂的报错丢给它，搞不懂的流程问它，直到项目成功运行。我觉得没有什么比这种感觉更棒。</p>
+							<p>最后的最后，我遇到了 Agent。</p>
+							<p>……</p>
+						</div>
+					</div>
+				</div>
+			</header>
+			<section class="guestbook-card" id="guestbook" aria-labelledby="guestbook-title">
+				<div class="guestbook-heading-row">
+					<div class="guestbook-mark" aria-hidden="true">✧</div>
+					<div class="section-heading"><p class="eyebrow">GUESTBOOK · 01</p><h2 id="guestbook-title">留下一段故事</h2></div>
+					<span class="guestbook-stamp" aria-hidden="true">YOUR<br>STORY</span>
+				</div>
+				<p class="guestbook-intro">留个称呼，写下你想说的话。</p>
+				<form id="guestbook-form" class="guestbook-form">
+					<div class="form-row">
+						<label><span>名称 <i>*</i></span><input name="name" type="text" autocomplete="name" maxlength="40" required placeholder="怎么称呼？"></label>
+						<label><span>邮箱 <i>*</i></span><input name="email" type="email" autocomplete="email" maxlength="254" required placeholder="仅管理员可见"></label>
+					</div>
+					<label><span>留言 <i>*</i></span><textarea name="message" rows="3" maxlength="2000" required placeholder="写下你想分享的内容……"></textarea></label>
+					<div class="form-footer">
+						<p class="privacy-note"><span aria-hidden="true">🔒</span> 邮箱保存在 Supabase，仅管理员可见；留言经审核通过后才会公开。</p>
+						<button type="submit" disabled>留言服务连接中……</button>
+					</div>
+					<label class="honeypot" aria-hidden="true"><span>请勿填写</span><input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+				</form>
+				<p class="guestbook-status" role="status" aria-live="polite">留言服务连接中……</p>
+				<div id="guestbook-list" class="guestbook-list" aria-live="polite"><p class="empty-state">期待听到你的故事。</p></div>
+			</section>
+			<footer class="about-footer">© <span id="year"></span> 狐Fn · 愿每个故事都有人倾听</footer>
+		</div>
+	</main>
+	<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+	<script src="asset/js/guestbook-config.js?v=20261003"></script>
+	<script src="asset/js/guestbook.js?v=20261003"></script>
+</body>
+</html>
