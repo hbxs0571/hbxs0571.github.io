@@ -1,60 +1,30 @@
-# HTML 入门模板
-
-一个美观现代的个人主页模板，具有响应式设计和互动功能。
-
-![image](docs/image/index.jpeg)
-
 ## 文件结构
 
-```
-html-starter-qwpicu/
-│── index.html # 主 HTML 文件
-│── favicon.ico # 网站图标
-│── README.md # 本文件
+~~~text
+hbxs0571.github.io/
+├── CNAME                         # 自定义域名 home.005711.xyz
+├── index.html                    # 主页
+├── about.html                    # 关于我与留言板
+├── favicon.ico                   # 网站图标
+├── README.md                     # 本文件
+├── docs/
+│   ├── image/index.jpeg           # 模板预览图
+│   └── 重新部署教程.md             # GitHub Pages、域名和留言板部署步骤
+├── supabase/
+│   ├── README.md                  # 留言板配置与审核说明
+│   └── guestbook.sql              # 留言表、权限和审核策略
 └── asset/
-│ ... qqlogo.jpg # QQ 徽标
-│ └── weixin.png # 微信二维码
-└── js/ # JavaScript 文件
-└── bing.js # Bing 壁纸 API
-└── clock.js # 时钟动画
-└── debuger.js # 开发者工具检测
-└── feature.js # 页面增强功能
-└── fetch.min.js # Fetch polyfill
-└── jquery.min.js # jQuery 库
-└── main.js # 主要功能
-└── xh_1.js # 雪花动画
-```
+    ├── css/                       # 页面样式（含 main.css、about.css）
+    ├── fonts/Milky-Coffee/        # 页面字体
+    ├── image/                     # 网站图标、微信二维码及背景素材
+    └── js/                        # 页面脚本（含 guestbook.js 与配置文件）
+~~~
 
 ## 许可证
 
-本项目为开源项目，遵循与原始模板相同的许可证。
+本仓库及上游 AsisYu 模板仓库均没有独立的 LICENSE 文件，因此没有为全部自定义代码和素材声明统一许可证。页面沿用的 HTML5 UP Aerial 模板部分遵循 [HTML5 UP 的 CC BY 3.0 许可说明](https://html5up.net/license)；请保留源文件中的署名和版权说明。其他第三方素材以其各自的许可为准。
 
 ## 致谢
 
-- **原始模板**：基于 HTML5 UP (html5up.net) 的 Aerial
-- **作者**：AsisYu
-- **许可证**：开源
-- **来源**：https://github.com/AsisYu/html-starter-qwpicu.git
-
-## 安装
-
-1. 克隆或下载此代码库
-2. 在 Web 浏览器中打开 `index.html`
-3. 根据需要自定义内容和样式
-4. 部署到您的 Web 服务器
-
-## 使用
-
-此模板旨在作为个人主页的起点。只需将占位符内容替换为您自己的信息，并自定义样式以符合您的偏好即可。
-
-## 贡献
-
-欢迎贡献！请随时提交问题、功能请求或拉取请求以改进此模板。
-
-## 支持
-
-如需支持或有任何疑问，请参阅原始代码库或在此项目中创建问题。
-
----
-
-**注意**：本模板保留所有原始开源版权声明和许可证。使用或修改本模板时，请保留这些版权声明。
+- [AsisYu/html-starter-qwpicu](https://github.com/AsisYu/html-starter-qwpicu)：个人主页模板与项目基础。
+- [HTML5 UP · Aerial](https://html5up.net/aerial)：页面所基于的原始设计模板。
