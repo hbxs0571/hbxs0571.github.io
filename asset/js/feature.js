@@ -14,15 +14,22 @@ window.onpageshow = function (event) {
 };
 var fresh_link = new Date().getTime();
 
-// 移除页面加载初始样式
-window.onload = function () { 
-  document.body.classList.remove('is-preload'); 
+// 不等待图片、字体等外部资源加载完成，避免资源卡住时页面一直保持透明
+function removePreloadState() {
+  document.body.classList.remove('is-preload');
 }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', removePreloadState, { once: true });
+} else {
+  removePreloadState();
+}
+
 // 禁止触摸滑动
-window.ontouchmove = function () { 
-  return false; 
+window.ontouchmove = function () {
+  return false;
 }
 // 屏幕旋转后重置滚动位置
-window.onorientationchange = function () { 
-  document.body.scrollTop = 0; 
+window.onorientationchange = function () {
+  document.body.scrollTop = 0;
 }
