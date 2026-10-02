@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="description" content="狐Fn的介绍与留言板。">
+	<title>关于我 | 狐Fnの主页</title>
+	<link rel="icon" type="image/png" href="asset/image/site-icon.png">
+	<link rel="stylesheet" href="asset/css/main.css?v=20261002">
+	<link rel="stylesheet" href="asset/css/fonts.css">
+	<link rel="stylesheet" href="asset/css/about.css?v=20261002">
+</head>
+<body class="about-body">
+	<div id="bg" aria-hidden="true"></div>
+	<div id="overlay" aria-hidden="true"></div>
+	<main id="main" class="about-page">
+		<div class="about-shell">
+			<a class="back-link" href="index.html"><span aria-hidden="true">←</span> 回到主页</a>
+			<header class="about-card">
+				<img class="about-avatar" src="asset/image/site-icon.png" alt="狐Fn头像">
+				<p class="eyebrow">ABOUT · 狐Fn</p>
+				<h1>关于我</h1>
+				<p class="about-motto">倾听者「我渴望你的故事」</p>
+				<p class="about-copy">谢谢你来到这里。无论是想分享近况、聊聊兴趣，还是只想说几句话，都欢迎留下你的故事。</p>
+			</header>
+			<section class="guestbook-card" aria-labelledby="guestbook-title">
+				<div class="section-heading">
+					<p class="eyebrow">GUESTBOOK</p>
+					<h2 id="guestbook-title">留下一段故事</h2>
+					<p>留下名称、邮箱和留言，我会认真阅读。</p>
+				</div>
+				<form id="guestbook-form" class="guestbook-form">
+					<div class="form-row">
+						<label><span>名称</span><input name="name" type="text" autocomplete="name" maxlength="40" required placeholder="怎么称呼你？"></label>
+						<label><span>邮箱</span><input name="email" type="email" autocomplete="email" maxlength="254" required placeholder="用于回复，不会公开显示"></label>
+					</div>
+					<label><span>留言</span><textarea name="message" rows="5" maxlength="2000" required placeholder="写下你想分享的内容……"></textarea></label>
+					<div class="form-footer">
+						<p class="privacy-note">留言和邮箱会保存在 Supabase 数据库。邮箱仅管理员可见；留言审核通过后才会公开。</p>
+						<button type="submit" disabled>留言服务连接中……</button>
+					</div>
+					<label class="honeypot" aria-hidden="true"><span>请勿填写</span><input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+				</form>
+				<p class="guestbook-status" role="status" aria-live="polite">留言服务连接中……</p>
+				<div id="guestbook-list" class="guestbook-list" aria-live="polite"><p class="empty-state">期待听到你的故事。</p></div>
+			</section>
+			<footer class="about-footer">© <span id="year"></span> 狐Fn · 愿每个故事都有人倾听</footer>
+		</div>
+	</main>
+	<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+	<script src="asset/js/guestbook-config.js?v=20261002"></script>
+	<script src="asset/js/guestbook.js?v=20261002"></script>
+</body>
+</html>
