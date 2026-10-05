@@ -11,3 +11,32 @@ html{min-height:100%;background:#171923}body.about-body{min-height:100vh;height:
 @media(max-width:760px){#main.about-page{padding:24px 18px 28px}.about-profile-row{flex-wrap:wrap;align-items:flex-start;gap:15px 20px;padding-bottom:19px}.about-avatar-frame{margin-top:-57px}.about-avatar{width:96px;height:96px}.about-profile-copy{padding-top:1px}}
 @media(max-width:560px){#main.about-page{padding:18px 13px 24px}.about-card,.guestbook-card{border-radius:25px}.about-cover{height:164px}.about-card-body{padding:0 20px 26px}.about-profile-row{gap:13px}.about-avatar-frame{margin-top:-49px;padding:5px}.about-avatar{width:78px;height:78px;border-width:2px}.about-card h1{font-size:2rem}.about-motto{font-size:.83rem}.about-bio{padding-top:19px}.about-story{font-size:.9rem}.about-story .about-lead{font-size:.98rem}.guestbook-card{margin-top:14px;padding:21px 17px}.guestbook-heading-row{gap:12px}.guestbook-mark{width:42px;height:42px;border-radius:13px}.guestbook-stamp{padding-left:10px;font-size:.56rem}.section-heading h2{font-size:1.42rem}.guestbook-intro{margin:0 0 13px 54px;font-size:.82rem}.form-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.guestbook-form label{font-size:.78rem}.guestbook-form input{padding:9px 10px;font-size:.78rem}.guestbook-form textarea{min-height:80px}.form-footer{align-items:center;gap:10px}.privacy-note{flex:1 1 auto;font-size:.68rem}.guestbook-form button{width:auto;gap:7px;padding:10px 12px;font-size:.76rem;white-space:nowrap}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+
+/* Page refinements: keep the homepage palette and give the story a clear reading path. */
+.about-cover{background:linear-gradient(180deg,rgba(20,22,35,.02) 8%,rgba(20,22,35,.3) 100%),url("https://img-api.moeblock.com/api.php") center 44%/cover no-repeat,linear-gradient(118deg,#4e4b83,#7773b8 37%,#668ac2 76%,#5288b9)}
+@media(min-width:761px){.about-cover{height:clamp(208px,25vw,268px)}}
+.about-bio{padding-top:clamp(24px,3vw,34px)}
+.about-story{position:relative;max-width:720px;margin:0 auto;padding-left:30px;font-size:.98rem;line-height:1.95;letter-spacing:.008em}
+.about-story:before{position:absolute;top:1.05em;bottom:.65em;left:4px;width:1px;background:linear-gradient(180deg,rgba(169,156,255,.05),rgba(169,156,255,.46) 14%,rgba(105,183,242,.3) 82%,rgba(105,183,242,0));content:""}
+.about-story p{position:relative;margin:0;padding:0 0 1.02em}
+.about-story p:not(.about-lead){padding-left:18px}
+.about-story p:not(.about-lead):before{position:absolute;top:.78em;left:-24px;width:7px;height:7px;border:1px solid rgba(169,156,255,.8);border-radius:50%;background:#222334;box-shadow:0 0 0 3px rgba(169,156,255,.09);content:""}
+.about-story p:last-child{padding-bottom:0}
+.about-story .about-lead{margin:0 0 1.35em;padding:14px 17px;border:0;border-left:2px solid rgba(177,165,255,.75);border-radius:0 14px 14px 0;background:linear-gradient(100deg,rgba(169,156,255,.13),rgba(105,183,242,.04));color:#eeeaff;font-size:1.08rem;line-height:1.8}
+.about-story .about-lead:before{display:none}
+.guestbook-card{padding:clamp(23px,3vw,31px) clamp(22px,4.5vw,44px)}
+.guestbook-stamp,.section-heading>.eyebrow{display:none}
+.guestbook-heading-row{margin-bottom:7px}
+.guestbook-intro{margin-bottom:13px}
+.guestbook-form{gap:10px}
+.guestbook-form label{gap:4px}
+.form-row{gap:12px}
+.guestbook-form input,.guestbook-form textarea{border-radius:12px}
+.guestbook-form textarea{min-height:78px}
+.guestbook-form button{padding:11px 16px}
+.back-link:focus-visible,.guestbook-form button:focus-visible{outline:2px solid #d8d0ff;outline-offset:3px}
+.guestbook-form input:focus-visible,.guestbook-form textarea:focus-visible{border-color:rgba(184,171,255,.9);box-shadow:0 0 0 3px rgba(155,140,255,.16)}
+@media(max-width:760px){.about-story{max-width:100%;padding-left:24px;font-size:.94rem;line-height:1.9}.about-story:before{left:3px}.about-story p:not(.about-lead){padding-left:14px}.about-story p:not(.about-lead):before{left:-19px;width:6px;height:6px}.about-story .about-lead{padding:12px 14px;font-size:1rem}}
+@media(max-width:560px){.about-cover{height:156px}.about-story{padding-left:22px;font-size:.9rem}.about-story:before{left:2px}.about-story p:not(.about-lead){padding-left:12px}.about-story p:not(.about-lead):before{left:-17px}.about-story .about-lead{font-size:.96rem}.guestbook-card{padding:20px 16px}.guestbook-form{gap:9px}.form-row{column-gap:8px}.guestbook-form input{min-width:0}.guestbook-form textarea{min-height:74px}}
+@media(max-width:360px){.form-row{grid-template-columns:1fr}}
