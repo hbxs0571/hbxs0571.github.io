@@ -40,3 +40,5 @@ html{min-height:100%;background:#171923}body.about-body{min-height:100vh;height:
 @media(max-width:760px){.about-story{max-width:100%;padding-left:24px;font-size:.94rem;line-height:1.9}.about-story:before{left:3px}.about-story p:not(.about-lead){padding-left:14px}.about-story p:not(.about-lead):before{left:-19px;width:6px;height:6px}.about-story .about-lead{padding:12px 14px;font-size:1rem}}
 @media(max-width:560px){.about-cover{height:156px}.about-story{padding-left:22px;font-size:.9rem}.about-story:before{left:2px}.about-story p:not(.about-lead){padding-left:12px}.about-story p:not(.about-lead):before{left:-17px}.about-story .about-lead{font-size:.96rem}.guestbook-card{padding:20px 16px}.guestbook-form{gap:9px}.form-row{column-gap:8px}.guestbook-form input{min-width:0}.guestbook-form textarea{min-height:74px}}
 @media(max-width:360px){.form-row{grid-template-columns:1fr}}
+
+@media(max-width:360px){.form-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
