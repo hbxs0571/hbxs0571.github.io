@@ -8,7 +8,7 @@
 	<link rel="icon" type="image/png" href="asset/image/site-icon.png">
 	<link rel="stylesheet" href="asset/css/main.css?v=20261002">
 	<link rel="stylesheet" href="asset/css/fonts.css">
-	<link rel="stylesheet" href="asset/css/about.css?v=20261119">
+	<link rel="stylesheet" href="asset/css/about.css?v=20261121">
 </head>
 <body class="about-body font-milky-coffee">
 	<div id="bg" aria-hidden="true"></div>
@@ -22,6 +22,36 @@
 				<span class="pill-decor pill-decor--left" aria-hidden="true"></span>
 				<span class="pill-decor pill-decor--right" aria-hidden="true"></span>
 			</a>
+			<section class="token-ledger" id="token-ledger" aria-labelledby="token-title">
+				<button class="token-counter" type="button" aria-expanded="false" aria-controls="token-view">
+					<span class="token-head">
+						<span class="token-mark" aria-hidden="true">◇</span>
+						<span class="token-heading">
+							<span class="token-eyebrow">TOKEN LEDGER · 本工作区累计</span>
+							<span class="token-title" id="token-title">这个工作区烧掉了多少 Token</span>
+						</span>
+						<span class="token-hint" aria-hidden="true"><span class="token-hint-text">展开明细</span><span class="token-caret">⌄</span></span>
+					</span>
+					<span class="token-clock">
+						<span class="token-figure"><canvas id="token-canvas"></canvas><span class="token-unit"></span></span>
+					</span>
+					<span class="token-exact">—</span>
+					<span class="token-meta"></span>
+					<span class="token-composition"></span>
+				</button>
+				<div class="token-panel" id="token-panel">
+					<div class="token-panel-inner">
+						<div class="token-tabs" role="tablist">
+							<button class="token-tab" type="button" role="tab" data-view="heatmap" aria-selected="true">热力图</button>
+							<button class="token-tab" type="button" role="tab" data-view="projects" aria-selected="false">按项目</button>
+							<button class="token-tab" type="button" role="tab" data-view="models" aria-selected="false">按模型</button>
+							<button class="token-tab" type="button" role="tab" data-view="commits" aria-selected="false">按提交</button>
+						</div>
+						<div class="token-view" id="token-view" role="region" aria-label="Token 消耗明细"></div>
+						<p class="token-source">数据来自本机 DSH 会话日志，只统计 <code>N:\HarmonyProjects</code> 下的会话；工作区外的会话不计入。</p>
+					</div>
+				</div>
+			</section>
 			<header class="about-card">
 				<div class="about-hero">
 					<div class="about-cover" aria-hidden="true"></div>
@@ -88,6 +118,8 @@
 		</div>
 	</main>
 	<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+	<script src="asset/data/token-ledger.js?v=20261120"></script>
+	<script src="asset/js/token-ledger.js?v=20261120"></script>
 	<script src="asset/js/guestbook-config.js?v=20261003"></script>
 	<script src="asset/js/guestbook.js?v=20261003"></script>
 </body>

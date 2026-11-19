@@ -605,7 +605,658 @@ body.about-body {
 	text-align: center;
 }
 
-/* ===== 8. 页脚 ===== */
+/* ===== 8. Token 账本面板 ===== */
+/* 首屏数字仿主页时钟：点阵数字 + 15 色横向渐变，画在 canvas 上（见 asset/js/token-ledger.js） */
+/* 容器只负责纵向排布，自己不画任何底：总消耗、标签栏、明细区各自是独立的框 */
+.token-ledger {
+	position: relative;
+	display: block;
+	margin: 0 0 18px;
+	isolation: isolate;
+}
+
+
+/* 总消耗：不套白卡片，整块直接浮在壁纸上（就是主页时钟那套语言）。
+   所以这里的文字全部转白 + 阴影，靠壁纸对比度读。 */
+.token-counter {
+	display: block;
+	width: 100%;
+	padding: clamp(18px, 2.6vw, 26px) 0 clamp(16px, 2.4vw, 22px);
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: #fff;
+	font-family: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition: transform 0.3s ease;
+}
+
+.token-counter:hover {
+	transform: translateY(-1px);
+}
+
+/* 头部：标记 + 标题 + 展开提示 */
+.token-head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.token-mark {
+	display: grid;
+	place-items: center;
+	flex: 0 0 auto;
+	width: 38px;
+	height: 38px;
+	border-radius: 12px;
+	background: linear-gradient(140deg, var(--about-red), var(--about-purple));
+	color: #fff;
+	font-size: 1.05rem;
+	box-shadow: 0 8px 20px rgba(120, 90, 200, 0.28);
+}
+
+.token-heading {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.token-eyebrow {
+	display: block;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: 0.64rem;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.token-title {
+	display: block;
+	margin-top: 3px;
+	color: #fff;
+	font-size: clamp(0.98rem, 1.6vw, 1.1rem);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	text-shadow: 0 2px 14px rgba(14, 18, 32, 0.55);
+}
+
+.token-hint {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex: 0 0 auto;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: 0.74rem;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+	transition: color 0.3s ease;
+}
+
+.token-counter:hover .token-hint {
+	color: #fff;
+}
+
+.token-caret {
+	display: inline-block;
+	font-size: 0.9rem;
+	transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.token-ledger.is-open .token-caret {
+	transform: rotate(180deg);
+}
+
+.token-ledger.is-open .token-hint-text {
+	font-size: 0;
+}
+
+.token-ledger.is-open .token-hint-text:after {
+	font-size: 0.74rem;
+	content: "收起明细";
+}
+
+/* 数字玻璃板：参数 1:1 照搬主页 index.html 的 #canvas（main.css:1082-1095）——
+   2px 白边 + 15px 圆角 + 15% 白径向渐变 + blur(10px) + 15 秒循环变色。
+   玻璃本身必须是半透明的，壁纸要能透出来；一旦把底色做深做厚，
+   视觉上就变成「又套了一层」，那正是要避免的。 */
+.token-clock {
+	position: relative;
+	display: block;
+	margin: clamp(12px, 2vw, 18px) 0 0;
+	padding: clamp(12px, 2.2vw, 18px) clamp(10px, 1.8vw, 16px);
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-radius: 15px;
+	background: radial-gradient(circle at center,
+		rgba(255, 255, 255, 0.15) 0%,
+		rgba(255, 255, 255, 0.08) 50%,
+		rgba(255, 255, 255, 0.03) 100%);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	box-shadow:
+		0 0 20px rgba(255, 255, 255, 0.1),
+		inset 0 0 20px rgba(255, 255, 255, 0.05);
+	transition: all 0.3s ease;
+	animation:
+		tokenClockBorder 15s linear infinite,
+		tokenClockBackground 15s linear infinite;
+}
+
+.token-counter:hover .token-clock {
+	transform: scale(1.01);
+	box-shadow:
+		0 0 30px rgba(255, 255, 255, 0.2),
+		inset 0 0 25px rgba(255, 255, 255, 0.08);
+	animation-play-state: paused;
+}
+
+/* 以下两组关键帧的色值与 main.css 的 clockBorderColor / clockBackgroundColor 完全一致 */
+@keyframes tokenClockBorder {
+	0%      { border-color: rgba(255, 255, 255, 0.4); }
+	6.67%   { border-color: rgba(255, 107, 107, 0.4); }
+	13.33%  { border-color: rgba(78, 205, 196, 0.4); }
+	20%     { border-color: rgba(69, 183, 209, 0.4); }
+	26.67%  { border-color: rgba(150, 206, 180, 0.4); }
+	33.33%  { border-color: rgba(255, 234, 167, 0.4); }
+	40%     { border-color: rgba(221, 160, 221, 0.4); }
+	46.67%  { border-color: rgba(152, 216, 200, 0.4); }
+	53.33%  { border-color: rgba(247, 220, 111, 0.4); }
+	60%     { border-color: rgba(187, 143, 206, 0.4); }
+	66.67%  { border-color: rgba(133, 193, 233, 0.4); }
+	73.33%  { border-color: rgba(248, 196, 113, 0.4); }
+	80%     { border-color: rgba(130, 224, 170, 0.4); }
+	86.67%  { border-color: rgba(241, 148, 138, 0.4); }
+	93.33%  { border-color: rgba(215, 189, 226, 0.4); }
+	100%    { border-color: rgba(255, 255, 255, 0.4); }
+}
+
+/* 色值与 main.css:1062 的 clockBackgroundColor 完全一致 */
+@keyframes tokenClockBackground {
+	0%      { background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%); }
+	6.67%   { background: radial-gradient(circle at center, rgba(255, 107, 107, 0.15) 0%, rgba(255, 107, 107, 0.08) 50%, rgba(255, 107, 107, 0.03) 100%); }
+	13.33%  { background: radial-gradient(circle at center, rgba(78, 205, 196, 0.15) 0%, rgba(78, 205, 196, 0.08) 50%, rgba(78, 205, 196, 0.03) 100%); }
+	20%     { background: radial-gradient(circle at center, rgba(69, 183, 209, 0.15) 0%, rgba(69, 183, 209, 0.08) 50%, rgba(69, 183, 209, 0.03) 100%); }
+	26.67%  { background: radial-gradient(circle at center, rgba(150, 206, 180, 0.15) 0%, rgba(150, 206, 180, 0.08) 50%, rgba(150, 206, 180, 0.03) 100%); }
+	33.33%  { background: radial-gradient(circle at center, rgba(255, 234, 167, 0.15) 0%, rgba(255, 234, 167, 0.08) 50%, rgba(255, 234, 167, 0.03) 100%); }
+	40%     { background: radial-gradient(circle at center, rgba(221, 160, 221, 0.15) 0%, rgba(221, 160, 221, 0.08) 50%, rgba(221, 160, 221, 0.03) 100%); }
+	46.67%  { background: radial-gradient(circle at center, rgba(152, 216, 200, 0.15) 0%, rgba(152, 216, 200, 0.08) 50%, rgba(152, 216, 200, 0.03) 100%); }
+	53.33%  { background: radial-gradient(circle at center, rgba(247, 220, 111, 0.15) 0%, rgba(247, 220, 111, 0.08) 50%, rgba(247, 220, 111, 0.03) 100%); }
+	60%     { background: radial-gradient(circle at center, rgba(187, 143, 206, 0.15) 0%, rgba(187, 143, 206, 0.08) 50%, rgba(187, 143, 206, 0.03) 100%); }
+	66.67%  { background: radial-gradient(circle at center, rgba(133, 193, 233, 0.15) 0%, rgba(133, 193, 233, 0.08) 50%, rgba(133, 193, 233, 0.03) 100%); }
+	73.33%  { background: radial-gradient(circle at center, rgba(248, 196, 113, 0.15) 0%, rgba(248, 196, 113, 0.08) 50%, rgba(248, 196, 113, 0.03) 100%); }
+	80%     { background: radial-gradient(circle at center, rgba(130, 224, 170, 0.15) 0%, rgba(130, 224, 170, 0.08) 50%, rgba(130, 224, 170, 0.03) 100%); }
+	86.67%  { background: radial-gradient(circle at center, rgba(241, 148, 138, 0.15) 0%, rgba(241, 148, 138, 0.08) 50%, rgba(241, 148, 138, 0.03) 100%); }
+	93.33%  { background: radial-gradient(circle at center, rgba(215, 189, 226, 0.15) 0%, rgba(215, 189, 226, 0.08) 50%, rgba(215, 189, 226, 0.03) 100%); }
+	100%    { background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%); }
+}
+
+/* 主数字：canvas 点阵 + 单位 */
+.token-figure {
+	display: block;
+	min-height: 84px;
+}
+
+.token-figure canvas {
+	display: block;
+	max-width: 100%;
+	margin: 0 auto;
+}
+
+/* 单位（tokens / B）做成玻璃板右下角的角标：
+   半透明白底 + 细白边 + 同款圆角，和这块板子是同一套语言。 */
+.token-unit {
+	position: absolute;
+	right: clamp(10px, 1.6vw, 16px);
+	bottom: clamp(10px, 1.6vw, 14px);
+	padding: 2px 9px;
+	border: 1px solid rgba(255, 255, 255, 0.34);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.12);
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	line-height: 1.5;
+	text-transform: lowercase;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	pointer-events: none;
+}
+
+.token-unit:empty {
+	display: none;
+}
+
+.token-exact {
+	display: block;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.78rem;
+	letter-spacing: 0.02em;
+	text-align: center;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+/* 完整数字已经画在主位时这一行为空，不能留一段空白 */
+.token-exact:empty {
+	display: none;
+}
+
+.token-meta {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 6px 14px;
+	margin-top: 10px;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.72rem;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.token-meta span {
+	position: relative;
+}
+
+.token-meta span + span:before {
+	position: absolute;
+	top: 50%;
+	left: -8px;
+	color: rgba(255, 255, 255, 0.5);
+	content: "·";
+	transform: translateY(-50%);
+}
+
+/* 构成条：输入 / 输出 / 缓存读取 */
+.token-composition {
+	display: block;
+	margin-top: 14px;
+}
+
+.comp-bar {
+	display: flex;
+	height: 6px;
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.22);
+	overflow: hidden;
+}
+
+.comp-bar .comp {
+	display: block;
+	height: 100%;
+}
+
+.comp--in { background: linear-gradient(90deg, var(--about-blue), #5352ed); }
+.comp--out { background: linear-gradient(90deg, var(--about-green), #26d0ce); }
+.comp--cache { background: rgba(255, 255, 255, 0.55); }
+
+.comp-key {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 5px 6px;
+	margin-top: 8px;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.7rem;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.comp-key .dot {
+	display: inline-block;
+	width: 7px;
+	height: 7px;
+	margin-left: 6px;
+	border-radius: 50%;
+}
+
+.comp-key .dot:first-child {
+	margin-left: 0;
+}
+
+.dot--in { background: #4ecdc4; }
+.dot--out { background: #82e0aa; }
+.dot--cache { background: rgba(255, 255, 255, 0.6); }
+
+/* 展开面板：用 grid-template-rows 做高度过渡，避免 max-height 猜数字。
+   内部再配合位移 + 淡入，视觉上是「从总消耗框下面翻出来」。 */
+.token-panel {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.token-ledger.is-open .token-panel {
+	grid-template-rows: 1fr;
+}
+
+.token-panel-inner {
+	overflow: hidden;
+	transform: translateY(-14px);
+	opacity: 0;
+	transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.35s ease;
+}
+
+.token-ledger.is-open .token-panel-inner {
+	transform: translateY(0);
+	opacity: 1;
+}
+
+/* 标签栏与明细区都复用同一块"主页玻璃"：白半透明 + 2px 白边 + 15px 圆角，
+   和上面的时钟是同一块板子的语言，不再另起一套白卡片。 */
+.token-clock > *,
+.token-tabs > *,
+.token-view > * {
+	position: relative;
+	z-index: 1;
+}
+
+.token-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 14px;
+	padding: 12px 14px;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-radius: 15px;
+	background: radial-gradient(circle at center,
+		rgba(255, 255, 255, 0.15) 0%,
+		rgba(255, 255, 255, 0.08) 50%,
+		rgba(255, 255, 255, 0.03) 100%);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	box-shadow:
+		0 0 20px rgba(255, 255, 255, 0.1),
+		inset 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.token-tab {
+	padding: 6px 14px;
+	border: 1px solid rgba(255, 255, 255, 0.42);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.08);
+	color: rgba(255, 255, 255, 0.9);
+	font-family: inherit;
+	font-size: 0.76rem;
+	font-weight: 600;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+	cursor: pointer;
+	transition: all 0.25s ease;
+}
+
+.token-tab:hover {
+	border-color: rgba(255, 255, 255, 0.8);
+	background: rgba(255, 255, 255, 0.18);
+	color: #fff;
+}
+
+.token-tab[aria-selected="true"] {
+	border-color: rgba(255, 255, 255, 0.9);
+	background: rgba(255, 255, 255, 0.28);
+	color: #fff;
+	box-shadow: 0 0 18px rgba(255, 255, 255, 0.22);
+}
+
+/* 明细区：同一块主页玻璃 */
+.token-view {
+	margin-top: 10px;
+	padding: clamp(16px, 2.6vw, 22px) clamp(16px, 3vw, 24px);
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-radius: 15px;
+	background: radial-gradient(circle at center,
+		rgba(255, 255, 255, 0.15) 0%,
+		rgba(255, 255, 255, 0.08) 50%,
+		rgba(255, 255, 255, 0.03) 100%);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	box-shadow:
+		0 0 20px rgba(255, 255, 255, 0.1),
+		inset 0 0 20px rgba(255, 255, 255, 0.05);
+	color: #fff;
+}
+
+/* 时间热力图：照 GitHub 贡献图的排法 —— 一列 = 一周，一列 7 格 = 周日到周六，
+   顶部按列标月份，左侧标星期，鼠标悬停看当天日期与消耗。 */
+.heat-scroll {
+	--heat-cell: 13px;
+	overflow-x: auto;
+	padding-bottom: 4px;
+}
+
+.heat-inner {
+	display: inline-block;
+	min-width: 100%;
+}
+
+/* 月份行：列宽和间距必须与下面的格子完全一致，否则月份标签会对不齐 */
+.heat-months {
+	display: grid;
+	gap: 3px;
+	margin: 0 0 4px 30px;
+}
+
+.heat-month {
+	overflow: hidden;
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 0.6rem;
+	text-overflow: clip;
+	white-space: nowrap;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.heat-body {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+}
+
+/* 星期列：7 行，与格子同高，只标一 / 三 / 五 */
+.heat-days {
+	display: grid;
+	grid-template-rows: repeat(7, var(--heat-cell));
+	gap: 3px;
+	width: 24px;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.6rem;
+	line-height: var(--heat-cell);
+	text-align: right;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.heat-grid {
+	display: grid;
+	grid-auto-flow: column;
+	gap: 3px;
+}
+
+.heat-cell {
+	display: block;
+	width: var(--heat-cell);
+	height: var(--heat-cell);
+	border-radius: 3px;
+	/* 空格子也要有边界，否则在亮壁纸上整片热力图会消失 */
+	background: rgba(255, 255, 255, 0.12);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+/* 统计区间之外的格子：保留边界但不填色，看起来是「没有记录」而不是「零消耗」 */
+.heat-cell[data-out="1"] {
+	background: rgba(255, 255, 255, 0.04);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* 悬停提示：脱离文档流，跟着鼠标走 */
+.heat-tip {
+	position: fixed;
+	z-index: 9999;
+	display: none;
+	flex-direction: column;
+	gap: 3px;
+	max-width: 240px;
+	padding: 8px 11px;
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	border-radius: 10px;
+	background: rgba(20, 24, 40, 0.92);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	box-shadow: 0 10px 30px rgba(6, 9, 20, 0.45);
+	color: #fff;
+	font-size: 0.72rem;
+	line-height: 1.45;
+	pointer-events: none;
+}
+
+.heat-tip.is-on {
+	display: flex;
+}
+
+.heat-tip b {
+	font-weight: 700;
+}
+
+.heat-tip i {
+	color: rgba(255, 255, 255, 0.8);
+	font-style: normal;
+}
+
+/* 热力档位走主页时钟调色板：青 → 蓝 → 紫，越亮烧得越多 */
+.heat-l1 { background: rgba(78, 205, 196, 0.35); }
+.heat-l2 { background: rgba(69, 183, 209, 0.55); }
+.heat-l3 { background: rgba(133, 193, 233, 0.8); }
+.heat-l4 { background: rgba(187, 143, 206, 0.9); }
+.heat-l5 { background: linear-gradient(135deg, #dda0dd, #f1948a); }
+
+.heat-legend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+	margin-top: 12px;
+	color: rgba(255, 255, 255, 0.85);
+	font-size: 0.68rem;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.heat-legend .heat-cell {
+	width: 12px;
+	min-height: 12px;
+}
+
+.heat-note {
+	margin-left: 10px;
+}
+
+/* 列表：项目 / 模型 / 提交 */
+.token-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.token-row {
+	padding: 11px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.token-row:last-child {
+	border-bottom: 0;
+}
+
+.token-row-head {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+}
+
+.token-row-rank {
+	flex: 0 0 auto;
+	width: 20px;
+	color: rgba(255, 255, 255, 0.62);
+	font-size: 0.7rem;
+	font-variant-numeric: tabular-nums;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.token-row-name {
+	flex: 1 1 auto;
+	overflow: hidden;
+	color: #fff;
+	font-size: 0.82rem;
+	font-weight: 600;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.55);
+}
+
+.token-row-name code {
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.18);
+	color: #ffeaa7;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.76rem;
+}
+
+.token-row-val {
+	flex: 0 0 auto;
+	color: #fff;
+	font-size: 0.8rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.55);
+}
+
+.token-bar {
+	height: 4px;
+	margin: 6px 0 0 30px;
+	border-radius: 2px;
+	background: rgba(255, 255, 255, 0.16);
+	overflow: hidden;
+}
+
+.token-bar > i {
+	display: block;
+	height: 100%;
+	border-radius: 2px;
+	background: linear-gradient(90deg, #4ecdc4, #bb8fce);
+}
+
+.token-row-sub {
+	margin: 4px 0 0 30px;
+	color: rgba(255, 255, 255, 0.72);
+	font-size: 0.68rem;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.token-more,
+.token-empty {
+	margin: 12px 0 0;
+	color: rgba(255, 255, 255, 0.72);
+	font-size: 0.7rem;
+	text-align: center;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+/* 数据来源说明：跟着展开面板一起收起，样式上是一段不画框的小字 */
+.token-source {
+	margin: 10px 0 0;
+	padding: 0 6px;
+	color: rgba(255, 255, 255, 0.72);
+	font-size: 0.68rem;
+	line-height: 1.7;
+	text-shadow: 0 2px 10px rgba(14, 18, 32, 0.5);
+}
+
+.token-source code {
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.16);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.66rem;
+}
+
+/* 数据缺失时的降级样式 */
+.token-ledger.is-empty .token-clock {
+	display: none;
+}
+
+/* ===== 9. 页脚 ===== */
 .about-footer {
 	padding: 22px 8px 0;
 	color: rgba(255, 255, 255, 0.9);
@@ -614,7 +1265,7 @@ body.about-body {
 	text-shadow: 0 1px 10px rgba(12, 14, 24, 0.55);
 }
 
-/* ===== 9. 响应式 ===== */
+/* ===== 10. 响应式 ===== */
 @media (max-width: 760px) {
 	#main.about-page {
 		padding: 24px 18px 30px;
@@ -759,9 +1410,30 @@ body.about-body {
 	.back-hint {
 		display: none;
 	}
+
+	/* 移动端时钟照主页 main.css:1313 的做法收细边框、缩小圆角 */
+	.token-clock,
+	.token-tabs,
+	.token-view {
+		border-width: 1px;
+		border-radius: 10px;
+	}
+
+	.token-tabs {
+		padding: 10px 11px;
+	}
+
+	.token-tab {
+		padding: 5px 11px;
+		font-size: 0.72rem;
+	}
+
+	.token-view {
+		padding: 14px 13px;
+	}
 }
 
-/* ===== 10. 无障碍 ===== */
+/* ===== 11. 无障碍 ===== */
 .back-link:focus-visible,
 .submit-wrap > button:focus-visible,
 .guestbook-form input:focus-visible,
