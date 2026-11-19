@@ -146,7 +146,7 @@
     var now = performance.now();
     for (var d = 0; d < debris.length; d++) {
       var b = debris[d];
-      ctx.globalAlpha = debrisAlpha(b, now);
+      ctx.globalAlpha = debrisAlpha(b, now) * DEBRIS_ALPHA;
       ctx.beginPath();
       ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
       ctx.fillStyle = b.color;
@@ -218,12 +218,27 @@
 
   // 落底反弹的衰减系数，同 clock.js 的 e = 0.65
   var BOUNCE = 0.65;
+  // clock.js 用 setInterval(..., 50) 步进物理，我们跑在 rAF（约 16.7ms/帧）。
+  // vx / vy / g 的数值照抄没错，但逐帧累加会让速度变成 3 倍、重力变成 9 倍，
+  // 视觉上从「掉落滚动」变成「炸开乱窜」。按时间比例缩放步长才能和时钟同速。
+  var CLOCK_TICK = 50;
 
   // 碎粒寿命。主页时钟每秒重置一次，长尾被下一次重置吃掉，人眼只看得到
   // 炸开→落下→滚走一小段；我们没有下一次重置，用淡出代替那个「被吃掉」的时刻，
   // 否则会把本该看不见的 3.8s 尾巴完整暴露出来。物理参数一律不动。
   var DEBRIS_FADE_START = 1100;
   var DEBRIS_END = 1700;
+
+  // 碎粒比数字点小一号，出生透明度也不满。
+  // 主页时钟一次只炸「变掉的那一位」（约 30 个点），碎粒和数字同尺寸也看不出来；
+  // 我们点击时 800 多个点同时炸，同尺寸同色会盖在字形上，数字就糊成一片。
+  // 缩小 + 半透明让碎粒读作「渣」，数字本体（画在上层、全不透明）始终可辨。
+  var DEBRIS_SCALE = 0.62;
+  var DEBRIS_ALPHA = 0.9;
+  // 只有一部分点生碎粒。全生（800+ 颗）会从字形位置同时炸开，
+  // 把点与点之间的空隙填满，字形看着就变粗变糊；主页时钟只炸一位（几十颗），
+  // 从来不会出现这种密度。抽 28% 既保住「整体散开」的观感，又留出空隙。
+  var DEBRIS_RATIO = 0.28;
 
   // 碎粒的透明度：出生后 1.1s 内全不透明，之后 0.6s 线性淡到 0
   function debrisAlpha(b, now) {
@@ -238,11 +253,12 @@
   function spawnDebris(radius) {
     debris = [];   // 连点时先清掉上一轮，避免累积成一片雾
     for (var i = 0; i < particles.length; i++) {
+      if (Math.random() > DEBRIS_RATIO) continue;
       var p = particles[i];
       debris.push({
         x: p.tx,
         y: p.ty,
-        r: radius,
+        r: radius * DEBRIS_SCALE,
         color: p.color,
         // clock.js 的 Math.pow(-1, ...) 就是随机 ±1，这里直接写清楚
         vx: (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random()),
@@ -260,17 +276,23 @@
     // 画布用 CSS 像素尺寸，不是 attr 尺寸（attr 是乘过 dpr 的）
     var W = parseFloat(canvas.style.width) || canvas.clientWidth;
     var H = parseFloat(canvas.style.height) || canvas.clientHeight;
-    var floor = H - radius;
-    function step() {
+    var dr = radius * DEBRIS_SCALE;
+    var floor = H - dr;
+    // 以 clock.js 的 50ms 为一个时间单位，按实际帧间隔缩放位移。
+    // 上限 3 个单位，避免切后台回来时一帧跳出画布。
+    var lastT = performance.now();
+    function step(now) {
+      var dt = Math.min((now - lastT) / CLOCK_TICK, 3);
+      lastT = now;
       var alive = 0;
       for (var i = 0; i < debris.length; i++) {
         var b = debris[i];
-        b.x += b.vx;
-        b.y += b.vy;
-        b.vy += b.g;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        b.vy += b.g * dt;
         if (b.y > floor) { b.y = floor; b.vy = -b.vy * BOUNCE; }
         // 滚出左右边界、或已经淡完，就回收（同 clock.js 的 g()，多一条寿命判据）
-        if (b.x > -radius && b.x < W + radius && debrisAlpha(b, performance.now()) > 0) {
+        if (b.x > -dr && b.x < W + dr && debrisAlpha(b, performance.now()) > 0) {
           debris[alive] = b;
           alive++;
         }
@@ -345,7 +367,10 @@
     if (unitEl && !unitEl.textContent) unitEl.textContent = FULL.unit;
     // 数字用满整个内容区：角标是纯视觉浮层，完全不参与计算。
     // 这样墨迹四边到玻璃板边框的距离都等于玻璃板的 padding，天然等距。
-    var targetW = cw;
+    // 但要先扣掉左右各一份 INK_PAD：canvas 的 CSS 宽是 width + INK_PAD*2，
+    // 若直接拿 cw 当目标宽，canvas 会比容器宽 2px，被 max-width:100% 压回去，
+    // 内部绘制被横向压缩，右侧边距就少 2px（实测 16 vs 左侧 18）。
+    var targetW = Math.max(1, cw - INK_PAD * 2);
 
     // 优先画完整数字；完整数字被压得太小（点会粘成一片）时退回缩写，
     // 完整值由下面那行小字兜住，信息不丢。
@@ -378,10 +403,19 @@
 
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     // 画布四周各留 INK_PAD，给描边溢出半个像素的余量，不被边界切掉
-    var cssW = width + INK_PAD * 2, cssH = height + INK_PAD * 2;
+    var cssW = width + INK_PAD * 2;
+    // 底部再借一段玻璃板的 padding 当落点区。主页时钟的画布高 250，数字只占
+    // y=30..170，下面空出 80px 给碎粒掉落堆积；我们这块画布数字几乎占满全高，
+    // 碎粒一出生就贴地，只能横向铺开糊住字形。借 padding 这段高度当落点，
+    // 再用负 margin-bottom 抵消，玻璃板高度和四边等距都不会变。
+    var padBottom = 0;
+    var clockEl = canvas.closest(".token-clock");
+    if (clockEl) padBottom = parseFloat(window.getComputedStyle(clockEl).paddingBottom) || 0;
+    var cssH = height + INK_PAD * 2 + padBottom;
 
     canvas.style.width = cssW + "px";
     canvas.style.height = cssH + "px";
+    canvas.style.marginBottom = -padBottom + "px";
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
 
