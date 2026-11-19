@@ -129,6 +129,10 @@
   var particles = [];
   var rafId = 0;
   var lastWidth = 0;
+  // 爆裂用的碎粒，以及当前半径（碎粒要自己记半径，draw 时才知道画多大）
+  var debris = [];
+  var debrisRaf = 0;
+  var currentRadius = 3;
 
   function draw(ctx, radius) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -138,6 +142,18 @@
     // 亮壁纸上不会消失，暗壁纸上也不会糊成一团，同时保留彩色。
     ctx.lineWidth = Math.max(1, radius * 0.22);
     ctx.strokeStyle = "rgba(16, 20, 36, 0.55)";
+    // 碎粒先画，压在数字下面，不会糊住字形
+    var now = performance.now();
+    for (var d = 0; d < debris.length; d++) {
+      var b = debris[d];
+      ctx.globalAlpha = debrisAlpha(b, now);
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fillStyle = b.color;
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;   // 必须恢复，否则会连带把数字本体也画成半透明
     for (var i = 0; i < particles.length; i++) {
       var p = particles[i];
       ctx.beginPath();
@@ -198,6 +214,72 @@
       else snapAll();
     }
     rafId = requestAnimationFrame(step);
+  }
+
+  // 落底反弹的衰减系数，同 clock.js 的 e = 0.65
+  var BOUNCE = 0.65;
+
+  // 碎粒寿命。主页时钟每秒重置一次，长尾被下一次重置吃掉，人眼只看得到
+  // 炸开→落下→滚走一小段；我们没有下一次重置，用淡出代替那个「被吃掉」的时刻，
+  // 否则会把本该看不见的 3.8s 尾巴完整暴露出来。物理参数一律不动。
+  var DEBRIS_FADE_START = 1100;
+  var DEBRIS_END = 1700;
+
+  // 碎粒的透明度：出生后 1.1s 内全不透明，之后 0.6s 线性淡到 0
+  function debrisAlpha(b, now) {
+    var age = now - b.born;
+    if (age <= DEBRIS_FADE_START) return 1;
+    if (age >= DEBRIS_END) return 0;
+    return 1 - (age - DEBRIS_FADE_START) / (DEBRIS_END - DEBRIS_FADE_START);
+  }
+
+  // 把所有数字点复制成碎粒：位置取点的目标位 tx/ty（不是动画中的 cx/cy），
+  // 这样碎粒从「字形该在的位置」炸开，视觉上就是数字本身散掉
+  function spawnDebris(radius) {
+    debris = [];   // 连点时先清掉上一轮，避免累积成一片雾
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      debris.push({
+        x: p.tx,
+        y: p.ty,
+        r: radius,
+        color: p.color,
+        // clock.js 的 Math.pow(-1, ...) 就是随机 ±1，这里直接写清楚
+        vx: (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random()),
+        vy: -5,
+        g: 1.5 + Math.random(),
+        born: performance.now()
+      });
+    }
+  }
+
+  function startDebris(ctx, radius) {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { debris = []; return; }
+    cancelAnimationFrame(debrisRaf);
+    // 画布用 CSS 像素尺寸，不是 attr 尺寸（attr 是乘过 dpr 的）
+    var W = parseFloat(canvas.style.width) || canvas.clientWidth;
+    var H = parseFloat(canvas.style.height) || canvas.clientHeight;
+    var floor = H - radius;
+    function step() {
+      var alive = 0;
+      for (var i = 0; i < debris.length; i++) {
+        var b = debris[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.vy += b.g;
+        if (b.y > floor) { b.y = floor; b.vy = -b.vy * BOUNCE; }
+        // 滚出左右边界、或已经淡完，就回收（同 clock.js 的 g()，多一条寿命判据）
+        if (b.x > -radius && b.x < W + radius && debrisAlpha(b, performance.now()) > 0) {
+          debris[alive] = b;
+          alive++;
+        }
+      }
+      debris.length = alive;
+      draw(ctx, radius);
+      if (alive > 0) debrisRaf = requestAnimationFrame(step);
+    }
+    debrisRaf = requestAnimationFrame(step);
   }
 
   // 把一串字符转成点阵字形列表
@@ -277,6 +359,8 @@
     }
     if (!glyphs.length) return;
     radius = Math.max(MIN_R, Math.min(radius, MAX_R));
+    // 记住当前半径：点击爆裂时碎粒要用它当尺寸
+    currentRadius = radius;
 
     if (unitEl) unitEl.textContent = useFull ? FULL.unit : SHORT.unit;
     canvas.setAttribute("data-mode", useFull ? "full" : "short");
@@ -355,6 +439,14 @@
   // ---- 展开 / 收起 ----
   var rendered = false;
 
+  // 点击展开 / 收起时，全部字符爆裂一次（和数字自身的落位动画可以同时跑）
+  function burst() {
+    if (!particles.length) return;
+    var ctx = canvas.getContext("2d");
+    spawnDebris(currentRadius);
+    startDebris(ctx, currentRadius);
+  }
+
   toggle.addEventListener("click", function () {
     var open = card.classList.toggle("is-open");
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
@@ -362,6 +454,7 @@
       rendered = true;
       renderView("heatmap");
     }
+    burst();
   });
 
   // ---- 四个维度 ----
