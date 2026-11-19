@@ -1,0 +1,10 @@
+# 项目内临时目录：临时脚本、日志、截图，用完即删
+.tmp/
+
+# 编辑器 / 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/
