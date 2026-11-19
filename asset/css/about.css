@@ -722,7 +722,8 @@ body.about-body {
 	position: relative;
 	display: block;
 	margin: clamp(12px, 2vw, 18px) 0 0;
-	padding: clamp(12px, 2.2vw, 18px) clamp(10px, 1.8vw, 16px);
+	/* 四边同一个 padding：数字 + 角标正好铺满内容区，四周留白天然相等 */
+	padding: clamp(14px, 2vw, 18px);
 	border: 2px solid rgba(255, 255, 255, 0.3);
 	border-radius: 15px;
 	background: radial-gradient(circle at center,
@@ -788,24 +789,27 @@ body.about-body {
 	100%    { background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%); }
 }
 
-/* 主数字：canvas 点阵 + 单位 */
+/* 主数字：canvas 点阵铺满内容区，单位角标纯视觉浮在右下角。
+   canvas 的宽高由 JS 反解成正好铺满内容区，所以数字墨迹的四边
+   到玻璃板边框的距离都等于玻璃板的 padding，天然等距。
+   角标绝对定位、不占布局宽度，只是叠在数字上面 —— 两者不互相挤压。 */
 .token-figure {
+	position: relative;
 	display: block;
-	min-height: 84px;
 }
 
 .token-figure canvas {
 	display: block;
 	max-width: 100%;
-	margin: 0 auto;
 }
 
 /* 单位（tokens / B）做成玻璃板右下角的角标：
-   半透明白底 + 细白边 + 同款圆角，和这块板子是同一套语言。 */
+   半透明白底 + 细白边 + 同款圆角，和这块板子是同一套语言。
+   绝对定位浮在数字右下角，不参与布局，也不吃鼠标事件。 */
 .token-unit {
 	position: absolute;
-	right: clamp(10px, 1.6vw, 16px);
-	bottom: clamp(10px, 1.6vw, 14px);
+	right: 0;
+	bottom: 0;
 	padding: 2px 9px;
 	border: 1px solid rgba(255, 255, 255, 0.34);
 	border-radius: 999px;

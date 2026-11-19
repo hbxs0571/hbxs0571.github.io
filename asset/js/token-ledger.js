@@ -160,17 +160,32 @@
       return;
     }
     var frames = 0;
+    // 强制全部落位：动画到帧数上限还没收敛时直接归位，
+    // 否则会永久停在半空，数字就一直是糊的
+    function snapAll() {
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.cx = p.tx;
+        p.cy = p.ty;
+        p.settled = true;
+      }
+      draw(ctx, radius);
+    }
     function step() {
       var moving = false;
       for (var i = 0; i < particles.length; i++) {
         var p = particles[i];
         if (p.settled) continue;
+        // 横向必须自己收回 tx：初始抖动（±18px）只用来制造「从上面撒下来」的散开感，
+        // 不收回来的话每个点会永久偏在 tx 旁边，而点距只有 2r≈7.5px，
+        // 整个字形会被抖散成一团，看不出是什么数字。
+        p.cx += (p.tx - p.cx) * 0.18;
         p.vy += 1.05;
         p.cy += p.vy;
         if (p.cy >= p.ty) {
           p.cy = p.ty;
           p.vy = -p.vy * 0.55;
-          if (Math.abs(p.vy) < 1.6) { p.cy = p.ty; p.settled = true; }
+          if (Math.abs(p.vy) < 1.6) { p.cx = p.tx; p.cy = p.ty; p.settled = true; }
           else moving = true;
         } else {
           moving = true;
@@ -178,7 +193,9 @@
       }
       draw(ctx, radius);
       frames++;
-      if (moving && frames < 320) rafId = requestAnimationFrame(step);
+      if (!moving) return;
+      if (frames < 320) rafId = requestAnimationFrame(step);
+      else snapAll();
     }
     rafId = requestAnimationFrame(step);
   }
@@ -194,61 +211,90 @@
     return out;
   }
 
-  // 按可用宽度算这一串字能画多大（半径）
-  function fitRadius(glyphs, avail, gapRatio) {
+  // 同一个字形内相邻两个点的间隙（单位：半径）。
+  // 点距默认就是 2r（相切），再叠 0.22r 的描边后点会直接粘在一起 ——
+  // 位数少（半径大）时看不出来，11 位数字这种半径被压到 4px 的情况，
+  // 一整行就糊成一条色带。留出 0.7r 的空隙后每个点都独立可见。
+  var DOT_GAP = 0.7;
+
+  // canvas 内四周留给描边的余量。描边宽约 1px，会超出点的外沿半个像素，
+  // 不留这 1px 会被画布边界切掉。四边都留同样的 1px，不影响「四边等距」。
+  var INK_PAD = 1;
+  // 字形之间的间距（单位：半径），决定「13.30」这种相邻字符别粘一起
+  var GAP_RATIO = 2.4;
+  // 半径上下限：小于 2.2px 的点在 1x 屏上分不出单个点，大于 9.5px 会撑破玻璃板
+  var MIN_R = 2.2, MAX_R = 9.5;
+
+  // 这一串字占多少列（每个字形宽度不同：数字 7 列、逗号 2 列）
+  function glyphCols(glyphs) {
     var cols = 0;
     for (var g = 0; g < glyphs.length; g++) cols += glyphs[g][0].length;
-    var gaps = Math.max(0, glyphs.length - 1);
-    return avail / (cols * 2 + gaps * gapRatio);
+    return cols;
   }
 
-  // 角标（tokens 字样）压在玻璃板右下角，要让出它的位置，数字才不会撞上去。
-  // 注意：角标宽度必须「先有文本再量」，首次运行时角标还是空的、
-  // offsetWidth 为 0，会让预留变成 0，数字直接压到角标上。
-  var lastUnitW = -1;
+  // 按可用宽度反解半径，思路和主页时钟一样：宽度 / 总列数 = 每列多宽，
+  // 一列就是一个点的直径（2r），字形之间再额外留 gapRatio·r。
+  // 末尾的 - DOT_GAP 是个修正：按列数算会把「每个字形的最后一个点后面
+  // 不需要点间距」也算进去，多算的总量恰好是一个 DOT_GAP·r（与字数无关），
+  // 不减掉的话右边会比左边多出约 3px，四边就不齐了。
+  function solveRadius(glyphs, targetW, gapRatio) {
+    var cols = glyphCols(glyphs);
+    var gaps = Math.max(0, glyphs.length - 1);
+    return targetW / (cols * (2 + DOT_GAP) + gaps * gapRatio - DOT_GAP);
+  }
 
-  function layout(depth) {
+  /*
+   * 目标：数字点阵的四边到玻璃板内边距的距离完全相等。
+   *
+   * 做法不是「画完再居中」，而是反解尺寸：
+   *   玻璃板内容宽 cw 已知，直接拿它当 canvas 的目标宽度；
+   *   再用这个宽度反解半径 r，让「列数 × 点距 + 字形间距」正好等于它。
+   *   canvas 高度则由 r 唯一决定（10 行字形），玻璃板高度跟着 canvas 长。
+   *
+   * 这样点阵的墨迹左右各贴内容区边界、上下也各贴边界，
+   * 四个方向剩下的就是玻璃板自己的 padding —— 天然相等，不依赖居中。
+   * 单位角标是绝对定位的浮层，完全不参与这套计算。
+   */
+  function layout() {
     var cw = figure.clientWidth;
     if (!cw) return;
 
+    // 角标文本先落地，避免首帧角标是空的
     if (unitEl && !unitEl.textContent) unitEl.textContent = FULL.unit;
-    var unitW = unitEl ? unitEl.offsetWidth + 18 : 0;
+    // 数字用满整个内容区：角标是纯视觉浮层，完全不参与计算。
+    // 这样墨迹四边到玻璃板边框的距离都等于玻璃板的 padding，天然等距。
+    var targetW = cw;
 
-    // 字符间距 = gapRatio × 半径。必须 > 2 才不会让相邻字符的点粘在一起
-    //（主页时钟用 1.6，那里半径只有 7px，粘了看不出来；这里半径更大就必须放大）
-    var gapRatio = 2.8;
-    // canvas 是水平居中的，所以左右两侧都要扣掉角标宽度，
-    // 否则数字右边缘会压到右下角的 tokens 角标上；再留 24px 呼吸空间。
-    var avail = Math.max(80, cw - unitW * 2 - 24);
-
-    // 优先画完整数字；完整数字画出来半径太小（读不清）时退回 13.14 + B
-    var glyphs = toGlyphs(FULL.text);
-    var radius = fitRadius(glyphs, avail, gapRatio);
-    var useFull = radius >= 3.2;
+    // 优先画完整数字；完整数字被压得太小（点会粘成一片）时退回缩写，
+    // 完整值由下面那行小字兜住，信息不丢。
+    var fullGlyphs = toGlyphs(FULL.text);
+    var radius = solveRadius(fullGlyphs, targetW, GAP_RATIO);
+    var glyphs = fullGlyphs;
+    var useFull = radius >= MIN_R;
     if (!useFull) {
       glyphs = toGlyphs(SHORT.text);
-      radius = fitRadius(glyphs, avail, gapRatio);
+      radius = solveRadius(glyphs, targetW, GAP_RATIO);
     }
     if (!glyphs.length) return;
+    radius = Math.max(MIN_R, Math.min(radius, MAX_R));
 
     if (unitEl) unitEl.textContent = useFull ? FULL.unit : SHORT.unit;
     canvas.setAttribute("data-mode", useFull ? "full" : "short");
     // 完整数字已经画在主位，小字那行就不必重复；退回缩写时才用这行兜住精确值
     if (exactEl) exactEl.textContent = useFull ? "" : group(tokens) + " tokens";
 
-    var cols = 0;
-    for (var g = 0; g < glyphs.length; g++) cols += glyphs[g][0].length;
+    var cols = glyphCols(glyphs);
     var gaps = Math.max(0, glyphs.length - 1);
+    // 点距：横向和纵向都留出 DOT_GAP·r，否则相邻两行的点会粘连，
+    // 数字的横杠（7 的顶横、0 的上下沿）会糊成实心条
+    var pitch = 2 * radius + DOT_GAP * radius;
+    var width = cols * pitch + gaps * GAP_RATIO * radius - DOT_GAP * radius;
+    // 10 行字形：9 个行距 + 最后一行自己的直径
+    var height = 9 * pitch + 2 * radius;
 
-    radius = Math.min(radius, 9.5);
-    radius = Math.max(radius, 2.2);
-
-    var width = cols * 2 * radius + gaps * gapRatio * radius;
-    var height = 20 * radius;
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    // canvas 只占数字本身的宽度（不再撑满），这样 flex 居中的是「数字 + 单位」整体。
-    // 左右各留一个半径，否则贴边的点会被 canvas 边界切掉半个。
-    var cssW = width + radius * 2 + 4, cssH = height + 16;
+    // 画布四周各留 INK_PAD，给描边溢出半个像素的余量，不被边界切掉
+    var cssW = width + INK_PAD * 2, cssH = height + INK_PAD * 2;
 
     canvas.style.width = cssW + "px";
     canvas.style.height = cssH + "px";
@@ -258,9 +304,10 @@
     var ctx = canvas.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    var originX = (cssW - width) / 2;
-    var originY = 8;
-    void originY;
+    // 墨迹左上角固定落在 (INK_PAD, INK_PAD)，不居中 —— 居中会引入
+    // 亚像素偏移，四边边距就不再严格相等
+    var originX = INK_PAD;
+    var originY = INK_PAD;
 
     particles = [];
     var x = originX;
@@ -269,8 +316,8 @@
       for (var row = 0; row < gl.length; row++) {
         for (var col = 0; col < gl[row].length; col++) {
           if (gl[row][col] !== 1) continue;
-          var tx = x + radius + 2 * radius * col;
-          var ty = originY + radius + 2 * radius * row;
+          var tx = x + radius + pitch * col;
+          var ty = originY + radius + pitch * row;
           var t = Math.max(0, Math.min(1, (tx - originX) / (width || 1)));
           particles.push({
             tx: tx, ty: ty,
@@ -282,23 +329,15 @@
           });
         }
       }
-      x += gl[0].length * 2 * radius + gapRatio * radius;
+      x += gl[0].length * pitch + GAP_RATIO * radius;
     }
 
     cancelAnimationFrame(rafId);
     draw(ctx, radius);
     startFall(ctx, radius);
-
-    // 角标文本在 full / short 之间切换后宽度会变，宽度变了就按新宽度重算一次
-    //（depth 挡住递归，最多重排一轮）
-    var nowW = unitEl ? unitEl.offsetWidth : 0;
-    if (!depth && nowW !== lastUnitW) {
-      lastUnitW = nowW;
-      layout(1);
-    }
   }
 
-  layout(0);
+  layout();
 
   if (window.ResizeObserver) {
     var timer = 0;
@@ -307,7 +346,7 @@
       if (w === lastWidth) return;
       lastWidth = w;
       clearTimeout(timer);
-      timer = setTimeout(layout, 140);
+      timer = setTimeout(function () { layout(); }, 140);
     }).observe(figure);
   } else {
     window.addEventListener("resize", layout);
