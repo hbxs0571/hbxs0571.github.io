@@ -9,7 +9,8 @@ hbxs0571.github.io/
 ├── README.md                     # 本文件
 ├── docs/
 │   ├── image/index.jpeg           # 模板预览图
-│   └── 重新部署教程.md             # GitHub Pages、域名和留言板部署步骤
+│   ├── 重新部署教程.md             # GitHub Pages、域名和留言板部署步骤
+│   └── 开发踩坑记录.md             # 开发中真实踩到的问题与解决办法
 ├── supabase/
 │   ├── README.md                  # 留言板配置与审核说明
 │   └── guestbook.sql              # 留言表、权限和审核策略
