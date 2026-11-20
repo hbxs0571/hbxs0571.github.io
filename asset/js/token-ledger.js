@@ -30,11 +30,15 @@
     return;
   }
 
-  // ---- 主页时钟的 15 色调色板（横向渐变用）----
-  // 数字框是深色玻璃底（同主页时钟压在壁纸上的观感），所以白色点能看见，原样保留。
+  // ---- 主页时钟的 15 色调色板 ----
+  // clock.js 整幅数字同一时刻只有一个颜色，每秒推进一个色号（currentColorIndex）；
+  // 原来这里的「横向彩虹渐变」主页时钟里根本不存在，已去掉。
   var PALETTE = ["#ffffff", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7",
     "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E9", "#F8C471",
     "#82E0AA", "#F1948A", "#D7BDE2"];
+
+  // 当前色号：整幅数字共用一个颜色，每秒推进一位（照抄 clock.js 的 currentColorIndex）
+  var colorIndex = 0;
 
   // 10×7 点阵字形，从 clock.js 原样搬来：0-9 共 10 个，索引 10 是冒号
   var GLYPH_SRC = "0011100|0110110|1100011|1100011|1100011|1100011|1100011|1100011|0110110|0011100;0001100|0111100|0001100|0001100|0001100|0001100|0001100|0001100|0001100|1111111;0111110|1100011|0000011|0000110|0001100|0011000|0110000|1100000|1100011|1111111;1111111|0000011|0000110|0001100|0011100|0000110|0000011|0000011|1100011|0111110;0000110|0001110|0011110|0110110|1100110|1111111|0000110|0000110|0000110|0001111;1111111|1100000|1100000|1111110|0000011|0000011|0000011|0000011|1100011|0111110;0000110|0011000|0110000|1100000|1101110|1100011|1100011|1100011|1100011|0111110;1111111|1100011|0000110|0000110|0001100|0001100|0011000|0011000|0011000|0011000;0111110|1100011|1100011|1100011|0111110|1100011|1100011|1100011|1100011|0111110;0111110|1100011|1100011|1100011|0111011|0000011|0000011|0000110|0001100|0110000;0000|0000|0110|0110|0000|0000|0110|0110|0000|0000";
@@ -133,15 +137,14 @@
   var debris = [];
   var debrisRaf = 0;
   var currentRadius = 3;
+  // 当前字形总数，以及相邻两位爆裂之间的间隔（毫秒）
+  var currentGlyphCount = 0;
+  // clock.js 是「哪一位的数字变了就炸哪一位」，天然是逐位的；
+  // 我们点击时全部字符要炸，就按从左到右一位一位地放，同一时刻只炸一位。
+  var STAGGER = 150;
 
   function draw(ctx, radius) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // 主页时钟压在固定的偏暗壁纸上，纯色点本身就够清楚；
-    // 关于页壁纸是随机图、亮暗都有，单靠颜色会和壁纸糊在一起。
-    // 所以每个点「实色填充 + 深色描边」：描边给点一个边界，
-    // 亮壁纸上不会消失，暗壁纸上也不会糊成一团，同时保留彩色。
-    ctx.lineWidth = Math.max(1, radius * 0.22);
-    ctx.strokeStyle = "rgba(16, 20, 36, 0.55)";
     // 碎粒先画，压在数字下面，不会糊住字形
     var now = performance.now();
     for (var d = 0; d < debris.length; d++) {
@@ -151,7 +154,6 @@
       ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
       ctx.fillStyle = b.color;
       ctx.fill();
-      ctx.stroke();
     }
     ctx.globalAlpha = 1;   // 必须恢复，否则会连带把数字本体也画成半透明
     for (var i = 0; i < particles.length; i++) {
@@ -160,7 +162,6 @@
       ctx.arc(p.cx, p.cy, radius, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.fill();
-      ctx.stroke();
     }
   }
 
@@ -226,19 +227,19 @@
   // 碎粒寿命。主页时钟每秒重置一次，长尾被下一次重置吃掉，人眼只看得到
   // 炸开→落下→滚走一小段；我们没有下一次重置，用淡出代替那个「被吃掉」的时刻，
   // 否则会把本该看不见的 3.8s 尾巴完整暴露出来。物理参数一律不动。
-  var DEBRIS_FADE_START = 1100;
-  var DEBRIS_END = 1700;
+  var DEBRIS_FADE_START = 500;
+  var DEBRIS_END = 900;
 
-  // 碎粒比数字点小一号，出生透明度也不满。
-  // 主页时钟一次只炸「变掉的那一位」（约 30 个点），碎粒和数字同尺寸也看不出来；
-  // 我们点击时 800 多个点同时炸，同尺寸同色会盖在字形上，数字就糊成一片。
-  // 缩小 + 半透明让碎粒读作「渣」，数字本体（画在上层、全不透明）始终可辨。
-  var DEBRIS_SCALE = 0.62;
-  var DEBRIS_ALPHA = 0.9;
-  // 只有一部分点生碎粒。全生（800+ 颗）会从字形位置同时炸开，
-  // 把点与点之间的空隙填满，字形看着就变粗变糊；主页时钟只炸一位（几十颗），
-  // 从来不会出现这种密度。抽 28% 既保住「整体散开」的观感，又留出空隙。
-  var DEBRIS_RATIO = 0.28;
+  // clock.js 的碎粒和数字点同尺寸、同颜色、全不透明（它的 i() 里就是 r）。
+  // 之前缩小到 0.62 + 半透明 + 只抽 28%，是因为 800 多个点同时炸会把字形糊掉；
+  // 改成逐位爆裂后同一时刻只有一位在掉渣（几十颗），密度天然就低，不需要再削弱。
+  var DEBRIS_SCALE = 1;
+  var DEBRIS_ALPHA = 1;
+
+  // 每一位只抽 40% 的点生碎粒。主页时钟一次只炸变掉的那一位（约 30 颗），
+  // 我们要炸全部 14 位，若每位全生（约 57 颗 × 14 位），同时飞行中的碎粒
+  // 会长期维持在几百颗，把点与点之间的空隙填满，字形就被糊住了。
+  var DEBRIS_RATIO = 0.4;
 
   // 碎粒的透明度：出生后 1.1s 内全不透明，之后 0.6s 线性淡到 0
   function debrisAlpha(b, now) {
@@ -248,13 +249,13 @@
     return 1 - (age - DEBRIS_FADE_START) / (DEBRIS_END - DEBRIS_FADE_START);
   }
 
-  // 把所有数字点复制成碎粒：位置取点的目标位 tx/ty（不是动画中的 cx/cy），
-  // 这样碎粒从「字形该在的位置」炸开，视觉上就是数字本身散掉
-  function spawnDebris(radius) {
-    debris = [];   // 连点时先清掉上一轮，避免累积成一片雾
+  // 把某一位字形上的点复制成碎粒：位置取点的目标位 tx/ty（不是动画中的 cx/cy），
+  // 这样碎粒从「字形该在的位置」炸开，视觉上就是这一位散掉
+  function spawnDebrisForGlyph(gi, radius) {
     for (var i = 0; i < particles.length; i++) {
-      if (Math.random() > DEBRIS_RATIO) continue;
       var p = particles[i];
+      if (p.gi !== gi) continue;
+      if (Math.random() > DEBRIS_RATIO) continue;
       debris.push({
         x: p.tx,
         y: p.ty,
@@ -269,21 +270,35 @@
     }
   }
 
+  // 每次点击重新开始：清空上一轮碎粒和色号调度
+  function resetDebris() {
+    debris = [];
+    cancelAnimationFrame(debrisRaf);
+  }
+
   function startDebris(ctx, radius) {
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) { debris = []; return; }
-    cancelAnimationFrame(debrisRaf);
+    if (reduce) { resetDebris(); return; }
+    resetDebris();
     // 画布用 CSS 像素尺寸，不是 attr 尺寸（attr 是乘过 dpr 的）
     var W = parseFloat(canvas.style.width) || canvas.clientWidth;
     var H = parseFloat(canvas.style.height) || canvas.clientHeight;
     var dr = radius * DEBRIS_SCALE;
     var floor = H - dr;
+    var t0 = performance.now();
+    var nextGlyph = 0;
     // 以 clock.js 的 50ms 为一个时间单位，按实际帧间隔缩放位移。
     // 上限 3 个单位，避免切后台回来时一帧跳出画布。
     var lastT = performance.now();
     function step(now) {
       var dt = Math.min((now - lastT) / CLOCK_TICK, 3);
       lastT = now;
+      // 按位放出：每 STAGGER 毫秒解锁下一位，从左到右
+      var due = Math.floor((now - t0) / STAGGER) + 1;
+      while (nextGlyph < currentGlyphCount && nextGlyph < due) {
+        spawnDebrisForGlyph(nextGlyph, radius);
+        nextGlyph++;
+      }
       var alive = 0;
       for (var i = 0; i < debris.length; i++) {
         var b = debris[i];
@@ -299,7 +314,7 @@
       }
       debris.length = alive;
       draw(ctx, radius);
-      if (alive > 0) debrisRaf = requestAnimationFrame(step);
+      if (alive > 0 || nextGlyph < currentGlyphCount) debrisRaf = requestAnimationFrame(step);
     }
     debrisRaf = requestAnimationFrame(step);
   }
@@ -315,11 +330,10 @@
     return out;
   }
 
-  // 同一个字形内相邻两个点的间隙（单位：半径）。
-  // 点距默认就是 2r（相切），再叠 0.22r 的描边后点会直接粘在一起 ——
-  // 位数少（半径大）时看不出来，11 位数字这种半径被压到 4px 的情况，
-  // 一整行就糊成一条色带。留出 0.7r 的空隙后每个点都独立可见。
-  var DOT_GAP = 0.7;
+  // clock.js 的点距正好是 2r（点与点相切，没有间隙）。
+  // 之前留 0.7r 缝隙是为了在「彩虹 + 描边」下让每个点独立可见；
+  // 现在改成单色无描边，缝隙反而让字形读作稀疏点阵，不像主页的实心块面。
+  var DOT_GAP = 0;
 
   // canvas 内四周留给描边的余量。描边宽约 1px，会超出点的外沿半个像素，
   // 不留这 1px 会被画布边界切掉。四边都留同样的 1px，不影响「四边等距」。
@@ -386,6 +400,7 @@
     radius = Math.max(MIN_R, Math.min(radius, MAX_R));
     // 记住当前半径：点击爆裂时碎粒要用它当尺寸
     currentRadius = radius;
+    currentGlyphCount = glyphs.length;
 
     if (unitEl) unitEl.textContent = useFull ? FULL.unit : SHORT.unit;
     canvas.setAttribute("data-mode", useFull ? "full" : "short");
@@ -436,14 +451,14 @@
           if (gl[row][col] !== 1) continue;
           var tx = x + radius + pitch * col;
           var ty = originY + radius + pitch * row;
-          var t = Math.max(0, Math.min(1, (tx - originX) / (width || 1)));
           particles.push({
+            gi: k,   // 属于第几个字形，逐位爆裂要按它分组
             tx: tx, ty: ty,
             cx: tx + (Math.random() - 0.5) * 36,
             cy: -24 - Math.random() * 280,
             vy: 0,
             settled: false,
-            color: PALETTE[Math.round(t * (PALETTE.length - 1))]
+            color: PALETTE[colorIndex]
           });
         }
       }
@@ -454,6 +469,15 @@
     draw(ctx, radius);
     startFall(ctx, radius);
   }
+
+  // 照抄 clock.js：整幅数字共用一个颜色，每秒换一个色号。
+  // 数字本身不重画，只改每个点的 color 再重绘一次。
+  setInterval(function () {
+    if (!particles.length) return;
+    colorIndex = (colorIndex + 1) % PALETTE.length;
+    for (var i = 0; i < particles.length; i++) particles[i].color = PALETTE[colorIndex];
+    draw(canvas.getContext("2d"), currentRadius);
+  }, 1000);
 
   layout();
 
@@ -477,8 +501,7 @@
   function burst() {
     if (!particles.length) return;
     var ctx = canvas.getContext("2d");
-    spawnDebris(currentRadius);
-    startDebris(ctx, currentRadius);
+    startDebris(ctx, currentRadius);   // 内部会 resetDebris()，再按位放出碎粒
   }
 
   toggle.addEventListener("click", function () {
