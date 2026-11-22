@@ -1,0 +1,530 @@
+/* ------------------------------------------------------------
+   日间模式下的「一言」高亮
+   原样式是「浅色字 + 大范围同色发光」，在深底上是霓虹感，
+   换到浅底就等于看不见。日间改成「深色字 + 低饱和底色块」，
+   读起来像马克笔划过，可读性优先。
+   ------------------------------------------------------------ */
+html.ui-light .highlight-red,
+html.ui-light .highlight-green,
+html.ui-light .highlight-blue,
+html.ui-light .highlight-purple,
+html.ui-light .highlight-orange,
+html.ui-light .highlight-cyan,
+html.ui-light .highlight-pink,
+html.ui-light .highlight-yellow {
+	filter: none !important;
+	text-shadow: none !important;
+	border-radius: 4px;
+	padding: 0 3px;
+}
+html.ui-light .highlight-red { color: #b32e24 !important; background-color: rgba(255, 107, 107, 0.18); }
+html.ui-light .highlight-green { color: #1f7a49 !important; background-color: rgba(46, 213, 115, 0.20); }
+html.ui-light .highlight-blue { color: #2a3bd6 !important; background-color: rgba(55, 66, 250, 0.16); }
+html.ui-light .highlight-purple { color: #6b3a80 !important; background-color: rgba(155, 89, 182, 0.18); }
+html.ui-light .highlight-orange { color: #96590f !important; background-color: rgba(243, 156, 18, 0.22); }
+html.ui-light .highlight-cyan { color: #17867e !important; background-color: rgba(0, 206, 209, 0.18); }
+html.ui-light .highlight-pink { color: #b03a6e !important; background-color: rgba(255, 105, 180, 0.18); }
+html.ui-light .highlight-yellow { color: #7a5600 !important; background-color: rgba(241, 196, 15, 0.26); }
+
+/* ============================================================
+   右上角工具条（设置 / 日夜）与设置面板
+   ------------------------------------------------------------
+   两页共用。样式口径与站内玻璃卡片一致：2px 白边 + 圆角 +
+   半透明深底 + backdrop blur，按钮做成 40px 的方形胶囊。
+   主题相关的一切都走 html 上的 class / CSS 变量，这样
+   <head> 里的同步脚本能在首帧之前把状态摆好，不会闪一下白。
+   ============================================================ */
+
+html {
+	/* 壁纸不透明度：#bg 的 opacity 读这里 */
+	--ui-wall-opacity: 0.9;
+	/* 蒙版层：叠在壁纸之上、内容之下（#overlay 的 background-color） */
+	--ui-dim: 0.34;
+	--ui-dim-color: 8, 10, 20;
+}
+
+/* 夜间：再压暗一档，让白字与玻璃卡片立起来 */
+html.ui-night {
+	--ui-dim: 0.34;
+	--ui-dim-color: 8, 10, 20;
+}
+
+/* 日间：换成暖白蒙版，壁纸退成浅色底纹 */
+html.ui-light {
+	--ui-dim: 0.62;
+	--ui-dim-color: 246, 243, 239;
+}
+
+html.ui-no-wallpaper {
+	--ui-wall-opacity: 0;
+}
+
+/* 蒙版：#overlay 已经压在壁纸之上、内容之下，直接把颜色给它，
+   不必再插一层新元素去抢 z-index 的坑 */
+#overlay {
+	background-color: rgba(var(--ui-dim-color), var(--ui-dim));
+}
+
+/* 壁纸开关：动效一起停掉，免得裁掉之后还在平移 */
+html.ui-no-wallpaper #bg {
+	animation: none !important;
+	opacity: 0 !important;
+}
+
+/* 精简动效：把循环类与落位类动画全部停掉 */
+html.ui-reduce-motion #bg,
+html.ui-reduce-motion .iUp,
+html.ui-reduce-motion #canvas,
+html.ui-reduce-motion .token-clock {
+	animation: none !important;
+}
+
+html.ui-reduce-motion *,
+html.ui-reduce-motion *::before,
+html.ui-reduce-motion *::after {
+	transition-duration: 0.01ms !important;
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+}
+
+/* ============================================================
+   日间模式：把「直接压在壁纸上」的白字转成深字
+   ------------------------------------------------------------
+   关于页的白色玻璃卡片（.about-card / .guestbook-card）用
+   --about-glass + --about-ink，本来就是深字，日间不用管。
+   需要处理的是两类：
+   1. 裸白字 —— 没有卡片底衬、直接浮在壁纸上的文字；
+   2. token 区的玻璃底 —— 保持深色，因为点阵数字是浅色发光点，
+      换到白底会直接消失。
+   ============================================================ */
+
+html.ui-light .token-eyebrow,
+html.ui-light .token-hint,
+html.ui-light .token-source {
+	color: rgba(34, 39, 58, 0.72);
+}
+
+html.ui-light .token-title,
+html.ui-light .token-counter:hover .token-hint {
+	color: #22273a;
+}
+
+html.ui-light .token-exact,
+html.ui-light .token-meta,
+html.ui-light .comp-key {
+	color: rgba(34, 39, 58, 0.86);
+}
+
+html.ui-light .token-meta span + span:before {
+	color: rgba(34, 39, 58, 0.42);
+}
+
+html.ui-light .about-footer {
+	color: rgba(34, 39, 58, 0.7);
+}
+
+/* 回到主页：玻璃胶囊里的字 */
+html.ui-light .back-link {
+	color: rgba(34, 39, 58, 0.9);
+	border-color: rgba(34, 39, 58, 0.18);
+	background: rgba(255, 255, 255, 0.62);
+}
+
+/* ---- 主页：整页都是白字压在壁纸上 ---- */
+html.ui-light .panel-title,
+html.ui-light .panel-subtitle,
+html.ui-light .panel-cover__description,
+html.ui-light #description,
+html.ui-light #about {
+	color: #22273a;
+	text-shadow: 0 1px 2px rgba(255, 255, 255, 0.45);
+}
+
+html.ui-light .pill-button-text {
+	color: rgba(34, 39, 58, 0.92);
+}
+
+html.ui-light .pill-button {
+	border-color: rgba(34, 39, 58, 0.22);
+	background: rgba(255, 255, 255, 0.5);
+}
+
+html.ui-light .pill-button:hover .pill-button-text {
+	color: #10131f;
+}
+
+html.ui-light .contact-icon {
+	color: rgba(34, 39, 58, 0.78);
+	border-color: rgba(34, 39, 58, 0.18);
+	background: rgba(255, 255, 255, 0.5);
+}
+
+html.ui-light .contact-icon:hover {
+	color: #10131f;
+	border-color: rgba(34, 39, 58, 0.45);
+}
+
+html.ui-light #footer,
+html.ui-light #footer p,
+html.ui-light #footer a {
+	color: rgba(34, 39, 58, 0.72);
+}
+
+html.ui-light hr {
+	border-top-color: rgba(34, 39, 58, 0.18);
+}
+
+/* 日间模式下时钟玻璃框换成浅色 ——
+   注意必须停掉 clockBorderColor / clockBackgroundColor 那两支 15s 循环动画，
+   否则 keyframes 会盖掉这里的静态配色，框又跑回白边+深色渐变。 */
+html.ui-light #canvas {
+	border-color: rgba(34, 39, 58, 0.14) !important;
+	background: radial-gradient(circle at center, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.62) 50%, rgba(255, 255, 255, 0.46) 100%) !important;
+	box-shadow: 0 0 20px rgba(34, 39, 58, 0.07), inset 0 0 20px rgba(34, 39, 58, 0.035) !important;
+	animation: none !important;
+}
+
+/* ---------- 工具条 ---------- */
+
+.ui-tools {
+	position: fixed;
+	top: 18px;
+	right: 20px;
+	z-index: 900;
+	display: flex;
+	gap: 8px;
+}
+
+.ui-tool {
+	display: grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.26);
+	border-radius: 13px;
+	background: rgba(14, 18, 32, 0.5);
+	color: rgba(255, 255, 255, 0.86);
+	-webkit-backdrop-filter: blur(14px);
+	backdrop-filter: blur(14px);
+	box-shadow:
+		0 6px 20px rgba(4, 6, 16, 0.35),
+		inset 0 0 14px rgba(255, 255, 255, 0.05);
+	cursor: pointer;
+	transition: transform 0.22s ease, border-color 0.22s ease,
+		background-color 0.22s ease, color 0.22s ease;
+}
+
+.ui-tool:hover,
+.ui-tool:focus-visible {
+	border-color: rgba(255, 255, 255, 0.72);
+	background: rgba(14, 18, 32, 0.72);
+	color: #fff;
+	transform: translateY(-2px);
+	outline: none;
+}
+
+.ui-tool:active {
+	transform: translateY(0);
+}
+
+.ui-tool svg {
+	width: 18px;
+	height: 18px;
+	display: block;
+}
+
+/* 两个图标互斥显示：月牙代表「切到夜间」，太阳代表「切到日间」 */
+.ui-tool[data-mode="dark"] .ui-icon-sun,
+.ui-tool[data-mode="light"] .ui-icon-moon {
+	display: none;
+}
+
+.ui-tool[aria-expanded="true"] {
+	border-color: rgba(255, 255, 255, 0.9);
+	background: rgba(14, 18, 32, 0.8);
+	color: #fff;
+}
+
+/* ---------- 设置面板 ---------- */
+
+.ui-panel {
+	position: fixed;
+	top: 70px;
+	right: 20px;
+	z-index: 901;
+	width: min(322px, calc(100vw - 32px));
+	max-height: calc(100vh - 96px);
+	overflow-y: auto;
+	padding: 16px 18px 14px;
+	border: 2px solid rgba(255, 255, 255, 0.28);
+	border-radius: 16px;
+	background-color: rgba(14, 18, 32, 0.92);
+	-webkit-backdrop-filter: blur(22px);
+	backdrop-filter: blur(22px);
+	box-shadow:
+		0 18px 50px rgba(2, 4, 14, 0.55),
+		inset 0 0 22px rgba(255, 255, 255, 0.04);
+	color: rgba(255, 255, 255, 0.92);
+	font-size: 0.8rem;
+	line-height: 1.5;
+	transform-origin: top right;
+	animation: uiPanelIn 0.22s ease both;
+}
+
+.ui-panel[hidden] {
+	display: none;
+}
+
+@keyframes uiPanelIn {
+	from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+	to   { opacity: 1; transform: none; }
+}
+
+.ui-panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 4px;
+	font-size: 0.86rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.ui-panel-close {
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 8px;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.7);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.ui-panel-close:hover {
+	border-color: rgba(255, 255, 255, 0.7);
+	color: #fff;
+}
+
+.ui-field {
+	display: block;
+	margin-top: 14px;
+}
+
+.ui-field-label {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 6px;
+	color: rgba(255, 255, 255, 0.62);
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.ui-field-value {
+	color: rgba(255, 255, 255, 0.9);
+	font-variant-numeric: tabular-nums;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+/* 分段控件 */
+.ui-seg {
+	display: flex;
+	gap: 4px;
+	padding: 3px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.ui-seg button {
+	flex: 1;
+	padding: 7px 6px;
+	border: 0;
+	border-radius: 7px;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.62);
+	font: inherit;
+	font-size: 0.74rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.ui-seg button:hover {
+	color: #fff;
+}
+
+.ui-seg button[aria-pressed="true"] {
+	background: rgba(255, 255, 255, 0.16);
+	color: #fff;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+/* 开关 */
+.ui-switch {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.ui-switch-track {
+	position: relative;
+	flex: none;
+	width: 42px;
+	height: 23px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	background: rgba(255, 255, 255, 0.08);
+	transition: background-color 0.22s ease, border-color 0.22s ease;
+}
+
+.ui-switch-knob {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 17px;
+	height: 17px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.75);
+	transition: transform 0.22s ease, background-color 0.22s ease;
+}
+
+.ui-switch[aria-checked="true"] .ui-switch-track {
+	border-color: rgba(130, 224, 190, 0.75);
+	background: rgba(130, 224, 190, 0.3);
+}
+
+.ui-switch[aria-checked="true"] .ui-switch-knob {
+	transform: translateX(19px);
+	background: #fff;
+}
+
+/* 滑块 */
+.ui-range {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 100%;
+	height: 22px;
+	background: transparent;
+	cursor: pointer;
+}
+
+.ui-range::-webkit-slider-runnable-track {
+	height: 4px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.18);
+}
+
+.ui-range::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 15px;
+	height: 15px;
+	margin-top: -5.5px;
+	border: 0;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.ui-range::-moz-range-track {
+	height: 4px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.18);
+}
+
+.ui-range::-moz-range-thumb {
+	width: 15px;
+	height: 15px;
+	border: 0;
+	border-radius: 50%;
+	background: #fff;
+}
+
+.ui-panel-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ui-action {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 9px;
+	background: rgba(255, 255, 255, 0.06);
+	color: rgba(255, 255, 255, 0.82);
+	font: inherit;
+	font-size: 0.74rem;
+	cursor: pointer;
+	transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.ui-action:hover {
+	border-color: rgba(255, 255, 255, 0.6);
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
+}
+
+.ui-action.is-done {
+	border-color: rgba(130, 224, 190, 0.8);
+	background: rgba(130, 224, 190, 0.22);
+	color: #fff;
+}
+
+.ui-reset {
+	padding: 6px 12px;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 999px;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.7);
+	font: inherit;
+	font-size: 0.72rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.ui-reset:hover {
+	border-color: rgba(255, 255, 255, 0.7);
+	color: #fff;
+}
+
+.ui-saved {
+	color: rgba(255, 255, 255, 0.34);
+	font-size: 0.68rem;
+}
+
+@media (max-width: 620px) {
+	.ui-tools {
+		top: 12px;
+		right: 12px;
+		gap: 6px;
+	}
+
+	.ui-tool {
+		width: 36px;
+		height: 36px;
+		border-radius: 11px;
+	}
+
+	.ui-panel {
+		top: 58px;
+		right: 12px;
+		max-height: calc(100vh - 74px);
+	}
+}

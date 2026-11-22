@@ -21,10 +21,31 @@
 	<meta name='description' content='狐Fn的个人主页：这里有个人介绍与留言板，也记录我折腾 OpenWrt、Docker、MC 服务器、Emby、AutoBangumi、WordPress，以及体验 AI 与 Agent 的经历。'>
 	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-	<link rel="stylesheet" href="asset/css/main.css?v=20261002" />
+	<link rel="stylesheet" href="asset/css/main.css?v=20261130" />
 	<link rel="stylesheet" type="text/css" href="asset/css/iconfont.css">
 	<link rel="stylesheet" type="text/css" href="asset/css/style.css">
 	<link rel="stylesheet" type="text/css" href="asset/css/fonts.css">	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="stylesheet" href="asset/css/ui-tools.css?v=20261130">
+	<script>
+		/* 首帧前把用户上次选的显示模式摆好，避免先闪一下默认主题 */
+		(function () {
+			try {
+				var raw = localStorage.getItem("hbxs.ui.v1");
+				var saved = raw ? JSON.parse(raw) : {};
+				var html = document.documentElement;
+				var mode = saved.mode || "auto";
+				if (mode === "auto") {
+					mode = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+				}
+				html.classList.add(mode === "dark" ? "ui-night" : "ui-light");
+				if (saved.wallpaper === false) html.classList.add("ui-no-wallpaper");
+				if (saved.motion === "reduced") html.classList.add("ui-reduce-motion");
+				if (typeof saved.wallOpacity === "number") {
+					html.style.setProperty("--ui-wall-opacity", String(saved.wallOpacity));
+				}
+			} catch (e) { /* 读不到就当默认，不影响页面 */ }
+		})();
+	</script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" media="print" onload="this.media='all'">
 
 	<!-- Google Fonts - 推荐字体组合 -->
@@ -51,7 +72,7 @@
 					<h1 class="panel-cover__title panel-title iUp">狐Fn</h1>
 					<p id="about" class="panel-cover__subtitle panel-subtitle iUp">倾听者「我渴望你的故事」</p>
 					<canvas class="navigation-wrapper iUp" id="canvas" style="width:50%;padding-top:15px;padding-right:20px;" width="920" height="350"></canvas>
-					<script src="asset/js/clock.js"></script>
+					<script src="asset/js/clock.js?v=20261130"></script>
 					<div class="pill-buttons-container iUp">
 						<a href="https://blog.005711.xyz/" class="pill-button" target="_blank" rel="noopener noreferrer"><div class="pill-button-decor pill-left"></div><div class="pill-button-decor pill-right"></div><span class="pill-button-text">博客</span></a>
 						<a href="https://github.com/hbxs0571" class="pill-button" target="_blank" rel="noopener noreferrer"><div class="pill-button-decor pill-left"></div><div class="pill-button-decor pill-right"></div><span class="pill-button-text">GitHub</span></a>
@@ -75,5 +96,6 @@
 	<script type="text/javascript" src="asset/js/jquery.min.js"></script>
 	<script type="text/javascript" src="asset/js/fetch.min.js"></script>
 	<script type="text/javascript" src="asset/js/main.js?v=20260930"></script>
+	<script src="asset/js/ui-tools.js?v=20261130"></script>
 </body>
 </html>

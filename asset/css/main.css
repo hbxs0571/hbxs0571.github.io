@@ -237,7 +237,8 @@ a {
 	background-repeat: repeat-x;
 	height: 100%;
 	left: 0;
-	opacity: 0.9;
+	/* 壁纸浓度由右上角设置面板控制（asset/css/ui-tools.css 定义变量） */
+	opacity: var(--ui-wall-opacity, 0.9);
 	/* ͸���� */
 	position: fixed;
 	top: 0;

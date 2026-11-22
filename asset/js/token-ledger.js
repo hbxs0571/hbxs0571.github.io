@@ -416,7 +416,11 @@
     // 10 行字形：9 个行距 + 最后一行自己的直径
     var height = 9 * pitch + 2 * radius;
 
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // 超采样：主页时钟画布写死 820x250，CSS 只显示 310px，等于 2.12 倍超采样，
+    // 点边缘因此极其干净。我们原来是 1:1 物理像素（dpr=1.25 就是 1.25 倍），
+    // 同样大小的点看起来反而更粗糙。补到 2 倍，上限压在 3 倍免得高分屏上画布过大。
+    var SUPERSAMPLE = 2;
+    var dpr = Math.min((window.devicePixelRatio || 1) * SUPERSAMPLE, 3);
     // 画布四周各留 INK_PAD，给描边溢出半个像素的余量，不被边界切掉
     var cssW = width + INK_PAD * 2;
     // 底部再借一段玻璃板的 padding 当落点区。主页时钟的画布高 250，数字只占
@@ -584,9 +588,11 @@
     }
     if (!max) return '<p class="token-empty">暂无热力图数据。</p>';
 
-    // 照 GitHub 的做法：末日所在周的周六为准往前推满一年（53 周），
-    // 即使只有几周数据也画完整的矩形 —— 没消耗的日子画最浅一档，
-    // 否则格子会缩在左上角，右边空一大片。
+    // 末日所在周的周六为准往前推，周数跟着数据走，不硬拉满一年。
+    // 周数固定铺满一年（53 周）：方格尺寸随之稳定在十几 px，
+    // 数据只落在右下侧一小块也没关系，那正是「什么时候开始记录」的诚实表达。
+    // 试过按数据量收缩到 6 周，结果是方格被撑到 56px、方阵只占面板中间一小段，
+    // 左右各露出三百多像素的壁纸，比空格子更难看 —— 所以这里保持 53。
     var endMs = lastMs + (6 - new Date(lastMs).getUTCDay()) * DAY_MS;
     var naturalWeeks = Math.round((endMs - (firstMs - new Date(firstMs).getUTCDay() * DAY_MS)) / DAY_MS / 7) + 1;
     var weeks = Math.max(naturalWeeks, 53);
@@ -630,7 +636,9 @@
       var text = (mk.m + 1) + "月";
       // 一年里月份会重复出现两次（跨年），只在 1 月和首个标签上带年份；
       // 但年份很占宽，只在跨度够 4 列时才加，否则会压到相邻标签上
-      if ((firstDrawn || mk.m === 0) && span >= 4) text = mk.y + "年" + text;
+      // 「2026年1月」有 8 个字符，一格才十几 px，span 不够 6 列就会被裁成
+      // 半截并压到邻居标签上 —— 所以年份只在宽度确实够的时候才加
+      if ((firstDrawn || mk.m === 0) && span >= 6) text = mk.y + "年" + text;
       firstDrawn = false;
       html += '<span class="heat-month" style="grid-column:' + (mk.w + 1) + " / span " + span + '">' + text + "</span>";
     }

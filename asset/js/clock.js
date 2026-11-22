@@ -31,6 +31,29 @@
     "#F1948A",  // 粉红色
     "#D7BDE2",  // 薰衣草色
   ];
+  // 日间模式用同一组色号的深色版：白底上浅色点会直接消失，
+  // 所以两套色板一一对应，只把明度翻过来。
+  const vDark = [
+    "#2b2f45",  // 深墨（替代白）
+    "#c23b31",  // 深珊瑚红
+    "#17867e",  // 深青绿
+    "#1f6f88",  // 深天蓝
+    "#3d7a5c",  // 深薄荷绿
+    "#8a6300",  // 深暖黄
+    "#8a4a97",  // 深梅花紫
+    "#2f7466",  // 深海绿
+    "#8a6300",  // 深金黄
+    "#6b3a80",  // 深淡紫
+    "#2b6a91",  // 深浅蓝
+    "#96590f",  // 深橙
+    "#1f7a49",  // 深浅绿
+    "#9c3b2e",  // 深粉红
+    "#5f4480",  // 深薰衣草
+  ];
+  // 当前主题该用哪套：读 <html> 上的 class，由 asset/js/ui-tools.js 维护
+  function palette() {
+    return document.documentElement.classList.contains("ui-light") ? vDark : v;
+  }
   var currentColorIndex = 0;
   var lastSecond = -1;
   var h = [];
@@ -175,11 +198,11 @@
     
     // 每秒更换颜色
     if (currentSecond !== lastSecond) {
-      currentColorIndex = (currentColorIndex + 1) % v.length;
+      currentColorIndex = (currentColorIndex + 1) % palette().length;
       lastSecond = currentSecond;
     }
     
-    f.fillStyle = v[currentColorIndex];
+    f.fillStyle = palette()[currentColorIndex];
     var e = 70,
       o = 30;
     var v_hours = r.getHours();
@@ -231,7 +254,7 @@
           var h = {
             offsetX: t.offsetX + r + r * 2 * f,
             offsetY: 30 + r + r * 2 * e,
-            color: v[currentColorIndex],
+            color: palette()[currentColorIndex],
             g: 1.5 + Math.random(),
             vx: Math.pow(-1, Math.ceil(Math.random() * 10)) * 4 + Math.random(),
             vy: -5,

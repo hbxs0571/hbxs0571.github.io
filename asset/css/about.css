@@ -726,12 +726,13 @@ body.about-body {
 	padding: clamp(14px, 2vw, 18px);
 	border: 2px solid rgba(255, 255, 255, 0.3);
 	border-radius: 15px;
-	background: radial-gradient(circle at center,
+	background-color: rgba(16, 20, 34, 0.86);
+	background-image: radial-gradient(circle at center,
 		rgba(255, 255, 255, 0.15) 0%,
 		rgba(255, 255, 255, 0.08) 50%,
 		rgba(255, 255, 255, 0.03) 100%);
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 	box-shadow:
 		0 0 20px rgba(255, 255, 255, 0.1),
 		inset 0 0 20px rgba(255, 255, 255, 0.05);
@@ -771,22 +772,22 @@ body.about-body {
 
 /* 色值与 main.css:1062 的 clockBackgroundColor 完全一致 */
 @keyframes tokenClockBackground {
-	0%      { background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%); }
-	6.67%   { background: radial-gradient(circle at center, rgba(255, 107, 107, 0.15) 0%, rgba(255, 107, 107, 0.08) 50%, rgba(255, 107, 107, 0.03) 100%); }
-	13.33%  { background: radial-gradient(circle at center, rgba(78, 205, 196, 0.15) 0%, rgba(78, 205, 196, 0.08) 50%, rgba(78, 205, 196, 0.03) 100%); }
-	20%     { background: radial-gradient(circle at center, rgba(69, 183, 209, 0.15) 0%, rgba(69, 183, 209, 0.08) 50%, rgba(69, 183, 209, 0.03) 100%); }
-	26.67%  { background: radial-gradient(circle at center, rgba(150, 206, 180, 0.15) 0%, rgba(150, 206, 180, 0.08) 50%, rgba(150, 206, 180, 0.03) 100%); }
-	33.33%  { background: radial-gradient(circle at center, rgba(255, 234, 167, 0.15) 0%, rgba(255, 234, 167, 0.08) 50%, rgba(255, 234, 167, 0.03) 100%); }
-	40%     { background: radial-gradient(circle at center, rgba(221, 160, 221, 0.15) 0%, rgba(221, 160, 221, 0.08) 50%, rgba(221, 160, 221, 0.03) 100%); }
-	46.67%  { background: radial-gradient(circle at center, rgba(152, 216, 200, 0.15) 0%, rgba(152, 216, 200, 0.08) 50%, rgba(152, 216, 200, 0.03) 100%); }
-	53.33%  { background: radial-gradient(circle at center, rgba(247, 220, 111, 0.15) 0%, rgba(247, 220, 111, 0.08) 50%, rgba(247, 220, 111, 0.03) 100%); }
-	60%     { background: radial-gradient(circle at center, rgba(187, 143, 206, 0.15) 0%, rgba(187, 143, 206, 0.08) 50%, rgba(187, 143, 206, 0.03) 100%); }
-	66.67%  { background: radial-gradient(circle at center, rgba(133, 193, 233, 0.15) 0%, rgba(133, 193, 233, 0.08) 50%, rgba(133, 193, 233, 0.03) 100%); }
-	73.33%  { background: radial-gradient(circle at center, rgba(248, 196, 113, 0.15) 0%, rgba(248, 196, 113, 0.08) 50%, rgba(248, 196, 113, 0.03) 100%); }
-	80%     { background: radial-gradient(circle at center, rgba(130, 224, 170, 0.15) 0%, rgba(130, 224, 170, 0.08) 50%, rgba(130, 224, 170, 0.03) 100%); }
-	86.67%  { background: radial-gradient(circle at center, rgba(241, 148, 138, 0.15) 0%, rgba(241, 148, 138, 0.08) 50%, rgba(241, 148, 138, 0.03) 100%); }
-	93.33%  { background: radial-gradient(circle at center, rgba(215, 189, 226, 0.15) 0%, rgba(215, 189, 226, 0.08) 50%, rgba(215, 189, 226, 0.03) 100%); }
-	100%    { background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%); }
+	0%      { background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%); }
+	6.67%   { background-image: radial-gradient(circle at center, rgba(255, 107, 107, 0.15) 0%, rgba(255, 107, 107, 0.08) 50%, rgba(255, 107, 107, 0.03) 100%); }
+	13.33%  { background-image: radial-gradient(circle at center, rgba(78, 205, 196, 0.15) 0%, rgba(78, 205, 196, 0.08) 50%, rgba(78, 205, 196, 0.03) 100%); }
+	20%     { background-image: radial-gradient(circle at center, rgba(69, 183, 209, 0.15) 0%, rgba(69, 183, 209, 0.08) 50%, rgba(69, 183, 209, 0.03) 100%); }
+	26.67%  { background-image: radial-gradient(circle at center, rgba(150, 206, 180, 0.15) 0%, rgba(150, 206, 180, 0.08) 50%, rgba(150, 206, 180, 0.03) 100%); }
+	33.33%  { background-image: radial-gradient(circle at center, rgba(255, 234, 167, 0.15) 0%, rgba(255, 234, 167, 0.08) 50%, rgba(255, 234, 167, 0.03) 100%); }
+	40%     { background-image: radial-gradient(circle at center, rgba(221, 160, 221, 0.15) 0%, rgba(221, 160, 221, 0.08) 50%, rgba(221, 160, 221, 0.03) 100%); }
+	46.67%  { background-image: radial-gradient(circle at center, rgba(152, 216, 200, 0.15) 0%, rgba(152, 216, 200, 0.08) 50%, rgba(152, 216, 200, 0.03) 100%); }
+	53.33%  { background-image: radial-gradient(circle at center, rgba(247, 220, 111, 0.15) 0%, rgba(247, 220, 111, 0.08) 50%, rgba(247, 220, 111, 0.03) 100%); }
+	60%     { background-image: radial-gradient(circle at center, rgba(187, 143, 206, 0.15) 0%, rgba(187, 143, 206, 0.08) 50%, rgba(187, 143, 206, 0.03) 100%); }
+	66.67%  { background-image: radial-gradient(circle at center, rgba(133, 193, 233, 0.15) 0%, rgba(133, 193, 233, 0.08) 50%, rgba(133, 193, 233, 0.03) 100%); }
+	73.33%  { background-image: radial-gradient(circle at center, rgba(248, 196, 113, 0.15) 0%, rgba(248, 196, 113, 0.08) 50%, rgba(248, 196, 113, 0.03) 100%); }
+	80%     { background-image: radial-gradient(circle at center, rgba(130, 224, 170, 0.15) 0%, rgba(130, 224, 170, 0.08) 50%, rgba(130, 224, 170, 0.03) 100%); }
+	86.67%  { background-image: radial-gradient(circle at center, rgba(241, 148, 138, 0.15) 0%, rgba(241, 148, 138, 0.08) 50%, rgba(241, 148, 138, 0.03) 100%); }
+	93.33%  { background-image: radial-gradient(circle at center, rgba(215, 189, 226, 0.15) 0%, rgba(215, 189, 226, 0.08) 50%, rgba(215, 189, 226, 0.03) 100%); }
+	100%    { background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%); }
 }
 
 /* 主数字：canvas 点阵铺满内容区，单位角标纯视觉浮在右下角。
@@ -801,6 +802,11 @@ body.about-body {
 .token-figure canvas {
 	display: block;
 	max-width: 100%;
+	/* 壁纸是亮的和风插画，粉紫点直接压上去几乎读不出来。
+	   主页时钟的浅绿点落在浅灰衣服上，天然有对比。
+	   给每个点补一圈极淡的暗边，让它从花底上立起来；
+	   不用 canvas 内描边（那会把相切的点粘成色带），用滤镜只做外扩。 */
+	filter: drop-shadow(0 0 1.5px rgba(8, 10, 20, 0.85));
 }
 
 /* 单位（tokens / B）做成玻璃板右下角的角标：
@@ -959,12 +965,13 @@ body.about-body {
 	padding: 12px 14px;
 	border: 2px solid rgba(255, 255, 255, 0.3);
 	border-radius: 15px;
-	background: radial-gradient(circle at center,
+	background-color: rgba(16, 20, 34, 0.86);
+	background-image: radial-gradient(circle at center,
 		rgba(255, 255, 255, 0.15) 0%,
 		rgba(255, 255, 255, 0.08) 50%,
 		rgba(255, 255, 255, 0.03) 100%);
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 	box-shadow:
 		0 0 20px rgba(255, 255, 255, 0.1),
 		inset 0 0 20px rgba(255, 255, 255, 0.05);
@@ -1003,12 +1010,13 @@ body.about-body {
 	padding: clamp(16px, 2.6vw, 22px) clamp(16px, 3vw, 24px);
 	border: 2px solid rgba(255, 255, 255, 0.3);
 	border-radius: 15px;
-	background: radial-gradient(circle at center,
+	background-color: rgba(16, 20, 34, 0.86);
+	background-image: radial-gradient(circle at center,
 		rgba(255, 255, 255, 0.15) 0%,
 		rgba(255, 255, 255, 0.08) 50%,
 		rgba(255, 255, 255, 0.03) 100%);
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 	box-shadow:
 		0 0 20px rgba(255, 255, 255, 0.1),
 		inset 0 0 20px rgba(255, 255, 255, 0.05);
@@ -1021,11 +1029,13 @@ body.about-body {
 	--heat-cell: 13px;
 	overflow-x: auto;
 	padding-bottom: 4px;
+	/* 周数跟着数据走之后，方阵不再铺满整个面板，靠居中收成一块完整的日历 */
+	text-align: center;
 }
 
 .heat-inner {
 	display: inline-block;
-	min-width: 100%;
+	text-align: left;
 }
 
 /* 月份行：列宽和间距必须与下面的格子完全一致，否则月份标签会对不齐 */
@@ -1074,15 +1084,15 @@ body.about-body {
 	width: var(--heat-cell);
 	height: var(--heat-cell);
 	border-radius: 3px;
-	/* 空格子也要有边界，否则在亮壁纸上整片热力图会消失 */
-	background: rgba(255, 255, 255, 0.12);
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+	/* 玻璃底现在是深色，空格子不必再用描边勾轮廓 —— 一圈圈描边会连成一张
+	   网格噪点，把真正的数据淹掉。只留一层很淡的实心色块，网格靠 gap 的缝
+	   自己成形；0.04 是在深底上「能看出有格子」与「不抢戏」之间的上限。 */
+	background: rgba(255, 255, 255, 0.04);
 }
 
-/* 统计区间之外的格子：保留边界但不填色，看起来是「没有记录」而不是「零消耗」 */
+/* 统计区间之外的格子：只留一点痕迹，比数据区更暗，读起来是「这段时间没记录」 */
 .heat-cell[data-out="1"] {
-	background: rgba(255, 255, 255, 0.04);
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+	background: rgba(255, 255, 255, 0.018);
 }
 
 /* 悬停提示：脱离文档流，跟着鼠标走 */

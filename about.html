@@ -6,9 +6,30 @@
 	<meta name="description" content="狐Fn的个人介绍与留言板，记录从网络、VR 到代码的兴趣变化，以及 OpenWrt、Docker、Minecraft（MC）服务器、Emby、AutoBangumi、WordPress 和 AI、Agent 的折腾经历。">
 	<title>关于我 | 狐Fnの主页</title>
 	<link rel="icon" type="image/png" href="asset/image/site-icon.png">
-	<link rel="stylesheet" href="asset/css/main.css?v=20261002">
+	<link rel="stylesheet" href="asset/css/main.css?v=20261130">
 	<link rel="stylesheet" href="asset/css/fonts.css">
-	<link rel="stylesheet" href="asset/css/about.css?v=20261122">
+	<link rel="stylesheet" href="asset/css/about.css?v=20261130">
+	<link rel="stylesheet" href="asset/css/ui-tools.css?v=20261130">
+	<script>
+		/* 首帧前把用户上次选的显示模式摆好，避免先闪一下默认主题 */
+		(function () {
+			try {
+				var raw = localStorage.getItem("hbxs.ui.v1");
+				var saved = raw ? JSON.parse(raw) : {};
+				var html = document.documentElement;
+				var mode = saved.mode || "auto";
+				if (mode === "auto") {
+					mode = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+				}
+				html.classList.add(mode === "dark" ? "ui-night" : "ui-light");
+				if (saved.wallpaper === false) html.classList.add("ui-no-wallpaper");
+				if (saved.motion === "reduced") html.classList.add("ui-reduce-motion");
+				if (typeof saved.wallOpacity === "number") {
+					html.style.setProperty("--ui-wall-opacity", String(saved.wallOpacity));
+				}
+			} catch (e) { /* 读不到就当默认，不影响页面 */ }
+		})();
+	</script>
 </head>
 <body class="about-body font-milky-coffee">
 	<div id="bg" aria-hidden="true"></div>
@@ -119,8 +140,9 @@
 	</main>
 	<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 	<script src="asset/data/token-ledger.js?v=20261122"></script>
-	<script src="asset/js/token-ledger.js?v=20261127"></script>
+	<script src="asset/js/token-ledger.js?v=20261130"></script>
 	<script src="asset/js/guestbook-config.js?v=20261003"></script>
 	<script src="asset/js/guestbook.js?v=20261003"></script>
+	<script src="asset/js/ui-tools.js?v=20261130"></script>
 </body>
 </html>
